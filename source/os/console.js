@@ -1,5 +1,4 @@
 ///<reference path="../globals.ts" />
-
 /* ------------
      Console.ts
 
@@ -8,34 +7,36 @@
      The OS Console - stdIn and stdOut by default.
      Note: This is not the Shell. The Shell is the "command line interface" (CLI) or interpreter for this console.
      ------------ */
-
-module TSOS {
-
-    export class Console {
-        constructor(public currentFont = _DefaultFontFamily,
-                    public currentFontSize = _DefaultFontSize,
-                    public currentXPosition = 0,
-                    public currentYPosition = _DefaultFontSize,
-                    public buffer = "",
-                    public prevend = 0) {
+var TSOS;
+(function (TSOS) {
+    var Console = /** @class */ (function () {
+        function Console(currentFont, currentFontSize, currentXPosition, currentYPosition, buffer, prevend) {
+            if (currentFont === void 0) { currentFont = _DefaultFontFamily; }
+            if (currentFontSize === void 0) { currentFontSize = _DefaultFontSize; }
+            if (currentXPosition === void 0) { currentXPosition = 0; }
+            if (currentYPosition === void 0) { currentYPosition = _DefaultFontSize; }
+            if (buffer === void 0) { buffer = ""; }
+            if (prevend === void 0) { prevend = 0; }
+            this.currentFont = currentFont;
+            this.currentFontSize = currentFontSize;
+            this.currentXPosition = currentXPosition;
+            this.currentYPosition = currentYPosition;
+            this.buffer = buffer;
+            this.prevend = prevend;
         }
-
-        public init(): void {
+        Console.prototype.init = function () {
             this.clearScreen();
             this.resetXY();
             ;
-        }
-
-        private clearScreen(): void {
+        };
+        Console.prototype.clearScreen = function () {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
-        }
-
-        private resetXY(): void {
+        };
+        Console.prototype.resetXY = function () {
             this.currentXPosition = 0;
             this.currentYPosition = this.currentFontSize;
-        }
-
-        public handleInput(): void {
+        };
+        Console.prototype.handleInput = function () {
             while (_KernelInputQueue.getSize() > 0) {
                 // Get the next character from the kernel input queue.
                 var chr = _KernelInputQueue.dequeue();
@@ -46,8 +47,8 @@ module TSOS {
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
-                
-                }else {
+                }
+                else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);
@@ -60,9 +61,8 @@ module TSOS {
                 this.prevend = this.currentXPosition;
                 this.advanceLine();
             }
-        }
-       
-        public putText(text): void {
+        };
+        Console.prototype.putText = function (text) {
             // My first inclination here was to write two functions: putChar() and putString().
             // Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
             // between the two.  So rather than be like PHP and write two (or more) functions that
@@ -78,20 +78,21 @@ module TSOS {
                 var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
                 this.currentXPosition = this.currentXPosition + offset;
             }
-         }
-
-        public advanceLine(): void {
+        };
+        Console.prototype.advanceLine = function () {
             this.currentXPosition = 0;
             /*
              * Font size measures from the baseline to the highest point in the font.
              * Font descent measures from the baseline to the lowest point in the font.
              * Font height margin is extra spacing between the lines.
              */
-            this.currentYPosition += _DefaultFontSize + 
-                                     _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
-                                     _FontHeightMargin;
-
+            this.currentYPosition += _DefaultFontSize +
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                _FontHeightMargin;
             // TODO: Handle scrolling. (iProject 1)
-        }
-    }
- }
+        };
+        return Console;
+    }());
+    TSOS.Console = Console;
+})(TSOS || (TSOS = {}));
+//# sourceMappingURL=console.js.map
