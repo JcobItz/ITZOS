@@ -48,6 +48,15 @@ var TSOS;
                     // ... and reset our buffer.
                     this.buffer = "";
                 }
+                else if (chr === String.fromCharCode(8)) { //    Backspace
+                    var curbuff = this.buffer;
+                    var buflen = this.buffer.length - 1;
+                    var last = curbuff.charAt(buflen);
+                    var off = (TSOS.CanvasTextFunctions.symbols[last].width * _DefaultFontSize) / 25.0;
+                    curbuff = curbuff.slice(0, -1);
+                    this.buffer = curbuff;
+                    this.backSpace(off);
+                }
                 else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -61,6 +70,15 @@ var TSOS;
                 this.prevend = this.currentXPosition;
                 this.advanceLine();
             }
+        };
+        Console.prototype.backSpace = function (off) {
+            if (this.currentXPosition <= 0) {
+                this.currentYPosition -= (_DefaultFontSize + _FontHeightMargin + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize));
+                var x = 0;
+                this.currentXPosition = this.prevend;
+            }
+            _DrawingContext.clearRect(this.currentXPosition - off, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);
+            this.currentXPosition = this.currentXPosition - off;
         };
         Console.prototype.putText = function (text) {
             // My first inclination here was to write two functions: putChar() and putString().
