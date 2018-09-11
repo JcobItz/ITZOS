@@ -154,11 +154,17 @@ module TSOS {
             ctx.lineCap = "round";
             ctx.lineWidth = 2.0 * mag;
             ctx.strokeStyle = "black";
-
+           
             for (var i = 0; i < len; i++) {
                 var c = CanvasTextFunctions.letter(str.charAt(i));
                 if (!c) {
                     continue;
+                }
+                if (x + c.width >= (_Canvas.width - 20)) {
+                    _StdOut.advanceLine();
+                    x = 0;
+                    y += _DefaultFontSize + _FontHeightMargin + CanvasTextFunctions.descent(_DefaultFontFamily, _DefaultFontSize);
+                    ctx.moveTo(x, y);
                 }
                 ctx.beginPath();
                 var penUp = true;

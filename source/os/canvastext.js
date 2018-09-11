@@ -54,6 +54,12 @@ var TSOS;
                 if (!c) {
                     continue;
                 }
+                if (x + c.width >= (_Canvas.width - 20)) {
+                    _StdOut.advanceLine();
+                    x = 0;
+                    y += _DefaultFontSize + _FontHeightMargin + CanvasTextFunctions.descent(_DefaultFontFamily, _DefaultFontSize);
+                    ctx.moveTo(x, y);
+                }
                 ctx.beginPath();
                 var penUp = true;
                 var needStroke = 0;
