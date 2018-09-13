@@ -54,11 +54,22 @@ var TSOS;
                 if (!c) {
                     continue;
                 }
-                if (x + c.width >= (_Canvas.width - 20)) {
+                //If any text will get cut off horizontally, it moves to next line so lines don't get cut off
+                if (x + c.width >= (_Canvas.width - 10)) {
                     _StdOut.advanceLine();
                     x = 0;
                     y += _DefaultFontSize + _FontHeightMargin + CanvasTextFunctions.descent(_DefaultFontFamily, _DefaultFontSize);
                     ctx.moveTo(x, y);
+                }
+                //if you reach the end of the command line area, the canvas gets larger and the text is retained.
+                if (y >= _Canvas.height) {
+                    var prevDisp = _Canvas.toDataURL('image/png');
+                    var img = new Image();
+                    img.src = prevDisp;
+                    _Canvas.height += 500;
+                    img.onload = function () {
+                        ctx.drawImage(img, 0, 0);
+                    };
                 }
                 ctx.beginPath();
                 var penUp = true;

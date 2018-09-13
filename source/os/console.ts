@@ -17,7 +17,7 @@ module TSOS {
                     public currentXPosition = 0,
                     public currentYPosition = _DefaultFontSize,
                     public buffer = "",
-                    public prevend = 0) {
+                    public prevend = 0, public history = "") {
         }
 
         public init(): void {
@@ -45,6 +45,7 @@ module TSOS {
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
+                    
                     this.buffer = "";
                 } else if(chr === String.fromCharCode(8)) {//    Backspace
                     var curbuff = this.buffer;
@@ -91,12 +92,15 @@ module TSOS {
             // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
             //         Consider fixing that.
             if (text !== "") {
+                this.history += text;
                 // Draw the text at the current X and Y coordinates.
                 _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
                 // Move the current X position.
                 var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
                 this.currentXPosition = this.currentXPosition + offset;
+              
             }
+            
          }
 
         public advanceLine(): void {
