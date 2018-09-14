@@ -36,6 +36,14 @@ module TSOS {
                                   "ver",
                                   "- Displays the current version data.");
             this.commandList[this.commandList.length] = sc;
+            sc = new ShellCommand(this.shellVer,
+                "version",
+                "- Displays the current version data.");
+            this.commandList[this.commandList.length] = sc;
+            sc = new ShellCommand(this.shellVer,
+                "v",
+                "- Displays the current version data.");
+            this.commandList[this.commandList.length] = sc;
 
             // help
             sc = new ShellCommand(this.shellHelp,
