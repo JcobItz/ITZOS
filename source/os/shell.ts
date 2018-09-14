@@ -37,12 +37,12 @@ module TSOS {
                                   "- Displays the current version data.");
             this.commandList[this.commandList.length] = sc;
             sc = new ShellCommand(this.shellVer,
-                "version",
-                "- Displays the current version data.");
+                                 "version",
+                                  "- Displays the current version data.");
             this.commandList[this.commandList.length] = sc;
             sc = new ShellCommand(this.shellVer,
-                "v",
-                "- Displays the current version data.");
+                                  "v",
+                                  "- Displays the current version data.");
             this.commandList[this.commandList.length] = sc;
 
             // help
@@ -98,6 +98,13 @@ module TSOS {
                 "whereami",
                 "Displays current location");
             this.commandList[this.commandList.length] = sc;
+
+            //java
+            sc = new ShellCommand(this.shellJava,
+                                "java",
+                                "Dispenses a hot cup of java");
+            this.commandList[this.commandList.length] = sc;
+
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -368,6 +375,31 @@ module TSOS {
                 return;
             });
         
+        }
+        public shellJava() {
+            _StdOut.putText("           S");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X");
+            _StdOut.advanceLine();
+            _StdOut.putText("X_____________________________X");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X   ===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X      =");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X   ===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X===");
+            _StdOut.advanceLine();
+            _StdOut.putText("XXXXXXXXXXXXXXXXXXXXXXXXX");
         }
 
     }

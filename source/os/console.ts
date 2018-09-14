@@ -45,19 +45,24 @@ module TSOS {
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
-                    
+
                     this.buffer = "";
-                } else if(chr === String.fromCharCode(8)) {//    Backspace
+                } else if (chr === String.fromCharCode(8)) {//    Backspace
                     var curbuff = this.buffer;
                     var buflen = this.buffer.length - 1;
                     var last = curbuff.charAt(buflen);
-                    var off = (CanvasTextFunctions.symbols[last].width * _DefaultFontSize)/25.0;
-                    
+                    var off = (CanvasTextFunctions.symbols[last].width * _DefaultFontSize) / 25.0;
+
                     curbuff = curbuff.slice(0, -1);
                     this.buffer = curbuff;
-                    
+
                     this.backSpace(off);
-                }else {
+                } else if (chr == String.fromCharCode(188) || chr == String.fromCharCode(190)) {
+                    this.putText(chr);
+                    
+                    this.buffer += chr;
+
+                } else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);
@@ -66,10 +71,7 @@ module TSOS {
                 }
                 // TODO: Write a case for Ctrl-C.
             }
-            if (this.currentXPosition >= (_Canvas.width - 20)) {
-                this.prevend = this.currentXPosition;
-                this.advanceLine();
-            }
+           
         }
         public backSpace(off): void {
             if (this.currentXPosition <= 0) {

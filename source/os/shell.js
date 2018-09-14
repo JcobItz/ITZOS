@@ -59,6 +59,9 @@ var TSOS;
             //whereami
             sc = new TSOS.ShellCommand(this.shellLoc, "whereami", "Displays current location");
             this.commandList[this.commandList.length] = sc;
+            //java
+            sc = new TSOS.ShellCommand(this.shellJava, "java", "Dispenses a hot cup of java");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -309,6 +312,31 @@ var TSOS;
                 _StdOut.putText("Your current location is latitude: " + lat + " longitude: " + lon + ".");
                 return;
             });
+        };
+        Shell.prototype.shellJava = function () {
+            _StdOut.putText("           S");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X");
+            _StdOut.advanceLine();
+            _StdOut.putText("X_____________________________X");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X   ===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X      =");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X   ===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X===");
+            _StdOut.advanceLine();
+            _StdOut.putText("XXXXXXXXXXXXXXXXXXXXXXXXX");
         };
         return Shell;
     }());

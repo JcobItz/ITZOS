@@ -59,6 +59,10 @@ var TSOS;
                     this.buffer = curbuff;
                     this.backSpace(off);
                 }
+                else if (chr == String.fromCharCode(188) || chr == String.fromCharCode(190)) {
+                    this.putText(chr);
+                    this.buffer += chr;
+                }
                 else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -67,10 +71,6 @@ var TSOS;
                     this.buffer += chr;
                 }
                 // TODO: Write a case for Ctrl-C.
-            }
-            if (this.currentXPosition >= (_Canvas.width - 20)) {
-                this.prevend = this.currentXPosition;
-                this.advanceLine();
             }
         };
         Console.prototype.backSpace = function (off) {
