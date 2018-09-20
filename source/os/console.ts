@@ -59,8 +59,16 @@ module TSOS {
                     this.backSpace(off);
                 } else if (chr == String.fromCharCode(188) || chr == String.fromCharCode(190)) {
                     this.putText(chr);
-                    
-                    this.buffer += chr;
+
+                    this.putText(chr);
+
+                } else if (chr == String.fromCharCode(9)) {
+                    this.suggestions(this.buffer);
+
+
+                } else if (chr == String.fromCharCode(38)) {
+                    var com = this.lastCommand();
+
 
                 } else {
                     // This is a "normal" character, so ...
@@ -72,6 +80,24 @@ module TSOS {
                 // TODO: Write a case for Ctrl-C.
             }
            
+        }
+        public suggestions(buff) {
+            var found = false;
+            var opts = _OsShell.commandList;
+
+           
+           
+            for (var i = 0; i < opts.length; i++) {
+               
+                if (_OsShell.commandList[i].command.substring(0, buff.length) == buff) {
+                    this.buffer += _OsShell.commandList[i].command.substring(buff.length, _OsShell.commandList[i].command.length);
+                    this.putText(_OsShell.commandList[i].command.substring(buff.length, _OsShell.commandList[i].command.length));
+                    break;
+                }
+              
+                continue;
+                
+            }
         }
         public backSpace(off): void {
             if (this.currentXPosition <= 0) {
@@ -103,7 +129,15 @@ module TSOS {
               
             }
             
-         }
+        }
+        public lastCommand() {
+            
+            var pointer = _OsShell.history.length;
+
+            return _OsShell.history[pointer];
+
+
+        }
 
         public advanceLine(): void {
             this.currentXPosition = 0;

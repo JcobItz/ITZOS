@@ -52,9 +52,8 @@ module TSOS {
             } else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
                         (keyCode == 32)                     ||   // space
                         (keyCode == 13)                     ||   // enter
-                        (keyCode == 8)                      ||   //backspace
-                        (keyCode == 190)                    ||   // period
-                        (keyCode == 188)){                       //comma
+                (keyCode == 8) ||    //backspace
+                (keyCode == 9) || (keyCode == 38) || (keyCode == 40)) {                      //tab                      
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }

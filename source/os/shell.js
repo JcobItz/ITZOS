@@ -18,6 +18,7 @@ var TSOS;
             // Properties
             this.promptStr = ">";
             this.commandList = [];
+            this.history = [];
             this.curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
             this.apologies = "[sorry]";
         }
@@ -76,6 +77,7 @@ var TSOS;
             _StdOut.putText(this.promptStr);
         };
         Shell.prototype.handleInput = function (buffer) {
+            this.TaskTime();
             _Kernel.krnTrace("Shell Command~" + buffer);
             //
             // Parse the input...
@@ -103,6 +105,7 @@ var TSOS;
             }
             if (found) {
                 this.execute(fn, args);
+                this.history[this.history.length] = buffer;
             }
             else {
                 // It's not found, so check for curses and apologies before declaring the command invalid.

@@ -20,6 +20,7 @@ module TSOS {
         // Properties
         public promptStr = ">";
         public commandList = [];
+        public history = [];
         public curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
         public apologies = "[sorry]";
 
@@ -111,6 +112,9 @@ module TSOS {
             this.commandList[this.commandList.length] = sc;
 
             this.TaskTime();
+
+            
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -124,6 +128,7 @@ module TSOS {
         }
 
         public handleInput(buffer) {
+            this.TaskTime();
             _Kernel.krnTrace("Shell Command~" + buffer);
             //
             // Parse the input...
@@ -150,6 +155,7 @@ module TSOS {
             }
             if (found) {
                 this.execute(fn, args);
+                this.history[this.history.length] = buffer;
             } else {
                 // It's not found, so check for curses and apologies before declaring the command invalid.
                 if (this.curses.indexOf("[" + Utils.rot13(cmd) + "]") >= 0) {     // Check for curses.
