@@ -105,7 +105,12 @@ module TSOS {
                                 "Dispenses a hot cup of java");
             this.commandList[this.commandList.length] = sc;
 
+            //status
+            sc = new ShellCommand(this.shellStatus, "status", "<string> - sets the status message in the taskbar");
 
+            this.commandList[this.commandList.length] = sc;
+
+            this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -401,6 +406,35 @@ module TSOS {
             _StdOut.advanceLine();
             _StdOut.putText("XXXXXXXXXXXXXXXXXXXXXXXXX");
         }
+
+        public shellStatus(message) {
+            var status = document.getElementById("status");
+            status.innerText = message;
+        }
+        public TaskTime() {
+            var time = document.getElementById("time");
+            var date = new Date();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            var year = date.getFullYear();
+            var today = "" + month + "/" + day + "/" + year;
+            var hours = date.getHours();
+            var mins = date.getMinutes();
+            var tod = "AM";
+
+            if (hours > 12) {
+                tod = "PM";
+                var adj = hours - 12;
+                hours = adj;
+            }
+            var sMins = "" + mins;
+            if (mins < 10) {
+                sMins = "0" + mins;
+
+            }
+            time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
+        }
+           
 
     }
 }

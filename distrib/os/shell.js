@@ -28,6 +28,10 @@ var TSOS;
             // ver
             sc = new TSOS.ShellCommand(this.shellVer, "ver", "- Displays the current version data.");
             this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellVer, "version", "- Displays the current version data.");
+            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellVer, "v", "- Displays the current version data.");
+            this.commandList[this.commandList.length] = sc;
             // help
             sc = new TSOS.ShellCommand(this.shellHelp, "help", "- This is the help command. Seek help.");
             this.commandList[this.commandList.length] = sc;
@@ -49,6 +53,19 @@ var TSOS;
             // prompt <string>
             sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
+            //date
+            sc = new TSOS.ShellCommand(this.shellDate, "date", "Displays current date and time.");
+            this.commandList[this.commandList.length] = sc;
+            //whereami
+            sc = new TSOS.ShellCommand(this.shellLoc, "whereami", "Displays current location");
+            this.commandList[this.commandList.length] = sc;
+            //java
+            sc = new TSOS.ShellCommand(this.shellJava, "java", "Dispenses a hot cup of java");
+            this.commandList[this.commandList.length] = sc;
+            //status
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - sets the status message in the taskbar");
+            this.commandList[this.commandList.length] = sc;
+            this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -196,6 +213,30 @@ var TSOS;
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    case "ver":
+                        _StdOut.putText("ver displays the current version of the shell.");
+                        break;
+                    case "shutdown":
+                        _StdOut.putText("Shuts down the virtualOS, but leaves underlying host and hardware simulation running.");
+                        break;
+                    case "cls":
+                        _StdOut.putText("Clears the screen and resets the cursor position.");
+                        break;
+                    case "man":
+                        _StdOut.putText("'man <topic>' displays the manual page for <topic>.");
+                        break;
+                    case "trace":
+                        _StdOut.putText("'trace <on | off>' turns the OS trace on or off.");
+                        break;
+                    case "rot13":
+                        _StdOut.putText("'rot13 <string>' does rot13 obfuscation on <string>.");
+                        break;
+                    case "prompt":
+                        _StdOut.putText("'prompt <string>' sets the prompt to <string>.");
+                        break;
+                    case "date":
+                        _StdOut.putText("Displays the current date and time.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -245,6 +286,86 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
+        };
+        Shell.prototype.shellDate = function () {
+            var date = new Date();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            var year = date.getFullYear();
+            var today = "" + month + "/" + day + "/" + year;
+            var hours = date.getHours();
+            var mins = date.getMinutes();
+            var tod = "AM";
+            if (hours > 12) {
+                tod = "PM";
+                var adj = hours - 12;
+                hours = adj;
+            }
+            var sMins = "" + mins;
+            if (mins < 10) {
+                sMins = "0" + mins;
+            }
+            _StdOut.putText("The date is: " + today + ".  The time is: " + hours + ":" + sMins + tod);
+        };
+        Shell.prototype.shellLoc = function () {
+            var lat;
+            var lon;
+            navigator.geolocation.getCurrentPosition(function (position) {
+                lat = position.coords.latitude;
+                lon = position.coords.longitude;
+                _StdOut.putText("Your current location is latitude: " + lat + " longitude: " + lon + ".");
+                return;
+            });
+        };
+        Shell.prototype.shellJava = function () {
+            _StdOut.putText("           S");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("           S  ");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X");
+            _StdOut.advanceLine();
+            _StdOut.putText("X_____________________________X");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X   ===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X      =");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X   ===");
+            _StdOut.advanceLine();
+            _StdOut.putText("X                             X===");
+            _StdOut.advanceLine();
+            _StdOut.putText("XXXXXXXXXXXXXXXXXXXXXXXXX");
+        };
+        Shell.prototype.shellStatus = function (message) {
+            var status = document.getElementById("status");
+            status.innerText = message;
+        };
+        Shell.prototype.TaskTime = function () {
+            var time = document.getElementById("time");
+            var date = new Date();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            var year = date.getFullYear();
+            var today = "" + month + "/" + day + "/" + year;
+            var hours = date.getHours();
+            var mins = date.getMinutes();
+            var tod = "AM";
+            if (hours > 12) {
+                tod = "PM";
+                var adj = hours - 12;
+                hours = adj;
+            }
+            var sMins = "" + mins;
+            if (mins < 10) {
+                sMins = "0" + mins;
+            }
+            time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
         };
         return Shell;
     }());

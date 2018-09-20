@@ -62,6 +62,10 @@ var TSOS;
             //java
             sc = new TSOS.ShellCommand(this.shellJava, "java", "Dispenses a hot cup of java");
             this.commandList[this.commandList.length] = sc;
+            //status
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - sets the status message in the taskbar");
+            this.commandList[this.commandList.length] = sc;
+            this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             //
@@ -337,6 +341,31 @@ var TSOS;
             _StdOut.putText("X                             X===");
             _StdOut.advanceLine();
             _StdOut.putText("XXXXXXXXXXXXXXXXXXXXXXXXX");
+        };
+        Shell.prototype.shellStatus = function (message) {
+            var status = document.getElementById("status");
+            status.innerText = message;
+        };
+        Shell.prototype.TaskTime = function () {
+            var time = document.getElementById("time");
+            var date = new Date();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            var year = date.getFullYear();
+            var today = "" + month + "/" + day + "/" + year;
+            var hours = date.getHours();
+            var mins = date.getMinutes();
+            var tod = "AM";
+            if (hours > 12) {
+                tod = "PM";
+                var adj = hours - 12;
+                hours = adj;
+            }
+            var sMins = "" + mins;
+            if (mins < 10) {
+                sMins = "0" + mins;
+            }
+            time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
         };
         return Shell;
     }());

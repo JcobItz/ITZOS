@@ -10,19 +10,21 @@
 var TSOS;
 (function (TSOS) {
     var Console = /** @class */ (function () {
-        function Console(currentFont, currentFontSize, currentXPosition, currentYPosition, buffer, prevend) {
+        function Console(currentFont, currentFontSize, currentXPosition, currentYPosition, buffer, prevend, history) {
             if (currentFont === void 0) { currentFont = _DefaultFontFamily; }
             if (currentFontSize === void 0) { currentFontSize = _DefaultFontSize; }
             if (currentXPosition === void 0) { currentXPosition = 0; }
             if (currentYPosition === void 0) { currentYPosition = _DefaultFontSize; }
             if (buffer === void 0) { buffer = ""; }
             if (prevend === void 0) { prevend = 0; }
+            if (history === void 0) { history = ""; }
             this.currentFont = currentFont;
             this.currentFontSize = currentFontSize;
             this.currentXPosition = currentXPosition;
             this.currentYPosition = currentYPosition;
             this.buffer = buffer;
             this.prevend = prevend;
+            this.history = history;
         }
         Console.prototype.init = function () {
             this.clearScreen();
@@ -57,6 +59,10 @@ var TSOS;
                     this.buffer = curbuff;
                     this.backSpace(off);
                 }
+                else if (chr == String.fromCharCode(188) || chr == String.fromCharCode(190)) {
+                    this.putText(chr);
+                    this.buffer += chr;
+                }
                 else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -65,10 +71,6 @@ var TSOS;
                     this.buffer += chr;
                 }
                 // TODO: Write a case for Ctrl-C.
-            }
-            if (this.currentXPosition >= (_Canvas.width - 20)) {
-                this.prevend = this.currentXPosition;
-                this.advanceLine();
             }
         };
         Console.prototype.backSpace = function (off) {
@@ -90,6 +92,7 @@ var TSOS;
             // UPDATE: Even though we are now working in TypeScript, char and string remain undistinguished.
             //         Consider fixing that.
             if (text !== "") {
+                this.history += text;
                 // Draw the text at the current X and Y coordinates.
                 _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
                 // Move the current X position.
