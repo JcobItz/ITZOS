@@ -67,6 +67,9 @@ var TSOS;
             //status
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - sets the status message in the taskbar");
             this.commandList[this.commandList.length] = sc;
+            //trigger error
+            sc = new TSOS.ShellCommand(this.shellTrigger, "trigger", "Triggers a BSOD");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -371,6 +374,9 @@ var TSOS;
                 sMins = "0" + mins;
             }
             time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
+        };
+        Shell.prototype.shellTrigger = function () {
+            _Kernel.krnTrapError("Routine test");
         };
         return Shell;
     }());

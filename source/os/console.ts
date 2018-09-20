@@ -168,5 +168,14 @@ module TSOS {
 
             // TODO: Handle scrolling. (iProject 1)
         }
+        public BSOD(msg) {
+            this.clearScreen();
+            var screen = document.getElementById("display");
+            screen.style.backgroundColor = "#4286f4";
+            this.putText("I'm Sorry, Looks like theres a Kernel Error.");
+            this.advanceLine();
+            this.putText("The Kernel trapped the following message:  " + msg);
+
+        }
     }
  }

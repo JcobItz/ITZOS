@@ -112,6 +112,10 @@ module TSOS {
 
             this.commandList[this.commandList.length] = sc;
 
+            //trigger error
+            sc = new ShellCommand(this.shellTrigger, "trigger", "Triggers a BSOD");
+
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
 
             
@@ -442,6 +446,9 @@ module TSOS {
 
             }
             time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
+        }
+        public shellTrigger() {
+            _Kernel.krnTrapError("Routine test");
         }
            
 
