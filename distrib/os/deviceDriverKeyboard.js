@@ -49,7 +49,7 @@ var TSOS;
             var chr = "";
             // Check to see if we even want to deal with the key that was pressed.
             if (((keyCode >= 65) && (keyCode <= 90)) || // A..Z
-                ((keyCode >= 97) && (keyCode <= 123)) || (keyCode > 189) && (keyCode < 191)) { // a..z {
+                ((keyCode >= 97) && (keyCode <= 123))) { // a..z {
                 // Determine the character we want to display.
                 // Assume it's lowercase...
                 chr = String.fromCharCode(keyCode + 32);
@@ -64,7 +64,7 @@ var TSOS;
                 (keyCode == 32) || // space
                 (keyCode == 13) || // enter
                 (keyCode == 8) || //backspace
-                (keyCode == 9)) { //tab                      
+                (keyCode == 9) || (keyCode == 38) || (keyCode == 40) || (keyCode == 188) || (keyCode == 190)) { //tab                      
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }

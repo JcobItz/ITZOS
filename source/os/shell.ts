@@ -21,6 +21,7 @@ module TSOS {
         public promptStr = ">";
         public commandList = [];
         public history = [];
+        public pointer = -1;
         public curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
         public apologies = "[sorry]";
 
@@ -154,8 +155,10 @@ module TSOS {
                 }
             }
             if (found) {
-                this.execute(fn, args);
                 this.history[this.history.length] = buffer;
+                this.pointer++;
+                this.execute(fn, args);
+               
             } else {
                 // It's not found, so check for curses and apologies before declaring the command invalid.
                 if (this.curses.indexOf("[" + Utils.rot13(cmd) + "]") >= 0) {     // Check for curses.

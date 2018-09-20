@@ -53,7 +53,7 @@ module TSOS {
                         (keyCode == 32)                     ||   // space
                         (keyCode == 13)                     ||   // enter
                 (keyCode == 8) ||    //backspace
-                (keyCode == 9) || (keyCode == 38) || (keyCode == 40)) {                      //tab                      
+                (keyCode == 9) || (keyCode == 38) || (keyCode == 40) || (keyCode == 188) || (keyCode == 190)) {                      //tab                      
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }

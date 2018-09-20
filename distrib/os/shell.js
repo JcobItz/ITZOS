@@ -19,6 +19,7 @@ var TSOS;
             this.promptStr = ">";
             this.commandList = [];
             this.history = [];
+            this.pointer = -1;
             this.curses = "[fuvg],[cvff],[shpx],[phag],[pbpxfhpxre],[zbgureshpxre],[gvgf]";
             this.apologies = "[sorry]";
         }
@@ -104,8 +105,9 @@ var TSOS;
                 }
             }
             if (found) {
-                this.execute(fn, args);
                 this.history[this.history.length] = buffer;
+                this.pointer++;
+                this.execute(fn, args);
             }
             else {
                 // It's not found, so check for curses and apologies before declaring the command invalid.

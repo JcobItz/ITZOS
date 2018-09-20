@@ -50,7 +50,7 @@ var TSOS;
                     // ... and reset our buffer.
                     this.buffer = "";
                 }
-                else if (chr === String.fromCharCode(8)) { //    Backspace
+                else if (chr == String.fromCharCode(8)) { //    Backspace
                     var curbuff = this.buffer;
                     var buflen = this.buffer.length - 1;
                     var last = curbuff.charAt(buflen);
@@ -59,15 +59,22 @@ var TSOS;
                     this.buffer = curbuff;
                     this.backSpace(off);
                 }
-                else if (chr == String.fromCharCode(188) || chr == String.fromCharCode(190)) {
-                    this.putText(chr);
-                    this.putText(chr);
-                }
                 else if (chr == String.fromCharCode(9)) {
                     this.suggestions(this.buffer);
                 }
                 else if (chr == String.fromCharCode(38)) {
                     var com = this.lastCommand();
+                    _DrawingContext.clearRect(10, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);
+                    this.currentXPosition = 10;
+                    this.putText(com);
+                }
+                else if (chr == String.fromCharCode(40)) {
+                    var com = this.nextCommand();
+                    if (com != "") {
+                        _DrawingContext.clearRect(10, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);
+                        this.currentXPosition = 10;
+                        this.putText(com);
+                    }
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -119,8 +126,14 @@ var TSOS;
             }
         };
         Console.prototype.lastCommand = function () {
-            var pointer = _OsShell.history.length;
-            return _OsShell.history[pointer];
+            _OsShell.pointer--;
+            this.buffer = _OsShell.history[_OsShell.pointer + 1];
+            return _OsShell.history[_OsShell.pointer + 1];
+        };
+        Console.prototype.nextCommand = function () {
+            _OsShell.pointer++;
+            this.buffer = _OsShell.history[_OsShell.pointer];
+            return _OsShell.history[_OsShell.pointer];
         };
         Console.prototype.advanceLine = function () {
             this.currentXPosition = 0;
