@@ -57,7 +57,7 @@ module TSOS {
                     this.buffer = curbuff;
 
                     this.backSpace(off);
-                }else if (chr == String.fromCharCode(9)) {
+                } else if (chr == String.fromCharCode(9)) {
                     this.suggestions(this.buffer);
 
 
@@ -76,12 +76,12 @@ module TSOS {
                         this.currentXPosition = 10;
                         this.putText(com);
                     }
-                   
-                    
 
 
 
-                }else {
+
+
+                } else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);

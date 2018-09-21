@@ -49,12 +49,53 @@ module TSOS {
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
-            } else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
+            }else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
                         (keyCode == 32)                     ||   // space
                         (keyCode == 13)                     ||   // enter
                 (keyCode == 8) ||    //backspace
-                (keyCode == 9) || (keyCode == 38) || (keyCode == 40) || (keyCode == 188) || (keyCode == 190)) {                      //tab                      
+                (keyCode == 9) || (keyCode == 38) || (keyCode == 40) || (keyCode == 188) || (keyCode == 190)) {                      //tab    
+                
                 chr = String.fromCharCode(keyCode);
+                if (isShifted) {
+                    if (keyCode == 49) {
+                        chr = "!";
+                    }
+                    if (keyCode == 50) {
+                        chr = "@";
+                    }
+                    if (keyCode == 51) {
+                        chr = "#";
+                    }
+                    if (keyCode == 52) {
+                        chr = "$";
+
+                    }
+                    if (keyCode == 53) {
+                        chr = "%";
+                    }
+                    if (keyCode == 54) {
+                        chr = "^";
+                    }
+                    if (keyCode == 55) {
+                        chr = "&";
+                    }
+                    if (keyCode == 56) {
+                        chr = "*";
+                    }
+                    if (keyCode == 57) {
+                        chr = "(";
+                    }
+                    if (keyCode == 48) {
+                        chr = ")";
+                    }
+                }
+                if (keyCode == 188) {
+                    chr = ",";
+                }
+                if (keyCode == 190) {
+                    chr = ".";
+                }
+
                 _KernelInputQueue.enqueue(chr);
             }
         }
