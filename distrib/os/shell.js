@@ -68,7 +68,10 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - sets the status message in the taskbar");
             this.commandList[this.commandList.length] = sc;
             //trigger error
-            sc = new TSOS.ShellCommand(this.shellTrigger, "trigger", "Triggers a BSOD");
+            sc = new TSOS.ShellCommand(this.shellTrigger, "trigger", " - Triggers a BSOD");
+            this.commandList[this.commandList.length] = sc;
+            //load
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", " - validates hex code in program input.");
             this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
@@ -378,8 +381,29 @@ var TSOS;
         Shell.prototype.shellTrigger = function () {
             _Kernel.krnTrapError("Routine test");
         };
+        Shell.prototype.shellLoad = function () {
+            var input = document.getElementById("taProgramInput");
+            var hex = [];
+            hex = input.value.split(" ");
+            var reg = new RegExp(/^[0-9a-fA-F]{6}$/);
+            for (var i = 0; i < hex.length; i++) {
+                if (reg.test(hex[i])) {
+                    if (i == (hex.length - 1)) {
+                        break;
+                    }
+                    continue;
+                }
+                else {
+                    _StdOut.putText("Invalid Input.");
+                    document.getElementById("taProgramInput").style.border = "2px solid red";
+                    return;
+                }
+            }
+            _StdOut.putText("Input Validated.");
+            document.getElementById("taProgramInput").style.border = "2px solid green";
+            return;
+        };
         return Shell;
     }());
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));
-//# sourceMappingURL=shell.js.map

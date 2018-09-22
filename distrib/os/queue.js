@@ -41,4 +41,3 @@ var TSOS;
     }());
     TSOS.Queue = Queue;
 })(TSOS || (TSOS = {}));
-//# sourceMappingURL=queue.js.map
