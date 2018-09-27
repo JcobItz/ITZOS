@@ -73,6 +73,9 @@ var TSOS;
             //load
             sc = new TSOS.ShellCommand(this.shellLoad, "load", " - validates hex code in program input.");
             this.commandList[this.commandList.length] = sc;
+            //run
+            sc = new TSOS.ShellCommand(this.shellRun, "run", " - runs program in memory location $0000");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -176,6 +179,7 @@ var TSOS;
                 _StdOut.putText("must be the pride of [subject hometown here].");
             }
             else {
+                _StdOut.putText(this.shellSpellCheck());
                 _StdOut.putText("Type 'help' for, well... help.");
             }
         };
@@ -223,7 +227,7 @@ var TSOS;
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    // Displays help, manual entry for specified shell command
                     case "ver":
                         _StdOut.putText("ver displays the current version of the shell.");
                         break;
@@ -299,6 +303,7 @@ var TSOS;
             }
         };
         Shell.prototype.shellDate = function () {
+            //Prints the Date and time to StdOut
             var date = new Date();
             var month = date.getMonth() + 1;
             var day = date.getDate();
@@ -319,6 +324,7 @@ var TSOS;
             _StdOut.putText("The date is: " + today + ".  The time is: " + hours + ":" + sMins + tod);
         };
         Shell.prototype.shellLoc = function () {
+            //prints the Latitude and longitude of the user, obtained from the browser, to StdOut
             var lat;
             var lon;
             navigator.geolocation.getCurrentPosition(function (position) {
@@ -329,6 +335,7 @@ var TSOS;
             });
         };
         Shell.prototype.shellJava = function () {
+            //just displays a simple coffee cup in StdOut
             _StdOut.putText("           S");
             _StdOut.advanceLine();
             _StdOut.putText("           S  ");
@@ -354,10 +361,12 @@ var TSOS;
             _StdOut.putText("XXXXXXXXXXXXXXXXXXXXXXXXX");
         };
         Shell.prototype.shellStatus = function (message) {
+            // changes status text in the toolbar at the top of the screen
             var status = document.getElementById("status");
             status.innerText = message;
         };
         Shell.prototype.TaskTime = function () {
+            //Updates the toolbar time
             var time = document.getElementById("time");
             var date = new Date();
             var month = date.getMonth() + 1;
@@ -379,13 +388,15 @@ var TSOS;
             time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
         };
         Shell.prototype.shellTrigger = function () {
+            //triggers an OS error
             _Kernel.krnTrapError("Routine test");
         };
         Shell.prototype.shellLoad = function () {
+            //validates user program input and loads it into main memory
             var input = document.getElementById("taProgramInput");
             var hex = [];
             hex = input.value.split(" ");
-            var reg = new RegExp(/^[0-9a-fA-F]{6}$/);
+            var reg = new RegExp(/^[0-9a-fA-F]{2}$/);
             for (var i = 0; i < hex.length; i++) {
                 if (reg.test(hex[i])) {
                     if (i == (hex.length - 1)) {
@@ -400,8 +411,27 @@ var TSOS;
                 }
             }
             _StdOut.putText("Input Validated.");
+            _StdOut.advanceLine();
             document.getElementById("taProgramInput").style.border = "2px solid green";
+            _CPU.Assemble(input.value);
             return;
+        };
+        Shell.prototype.shellSpellCheck = function () {
+            //checks the spelling of commands
+            var com = _Console.buffer;
+            var commands = this.commandList;
+            var suggestions = "";
+            for (var i = 0; i < commands.length; i++) {
+                if (commands[i][0].contains(com.substring(0, 1))) {
+                    suggestions += commands[i][0] + " ";
+                }
+                else {
+                    continue;
+                }
+            }
+            return suggestions;
+        };
+        Shell.prototype.shellRun = function () {
         };
         return Shell;
     }());

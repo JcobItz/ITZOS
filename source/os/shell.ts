@@ -113,9 +113,20 @@ module TSOS {
             this.commandList[this.commandList.length] = sc;
 
             //trigger error
-            sc = new ShellCommand(this.shellTrigger, "trigger", "Triggers a BSOD");
+            sc = new ShellCommand(this.shellTrigger, "trigger", " - Triggers a BSOD");
 
             this.commandList[this.commandList.length] = sc;
+            //load
+            sc = new ShellCommand(this.shellLoad, "load", " - validates hex code in program input.");
+
+            this.commandList[this.commandList.length] = sc;
+            //run
+            sc = new ShellCommand(this.shellRun, "run", " - runs program in memory location $0000");
+
+            this.commandList[this.commandList.length] = sc;
+            
+
+            
             this.TaskTime();
 
             
@@ -229,6 +240,7 @@ module TSOS {
                 _StdOut.advanceLine();
                 _StdOut.putText("must be the pride of [subject hometown here].");
             } else {
+                _StdOut.putText(this.shellSpellCheck());
                 _StdOut.putText("Type 'help' for, well... help.");
             }
         }
@@ -282,7 +294,7 @@ module TSOS {
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    // Displays help, manual entry for specified shell command
                     case "ver":
                         _StdOut.putText("ver displays the current version of the shell.");
                         break;
@@ -357,6 +369,7 @@ module TSOS {
             }
         }
         public shellDate() {
+            //Prints the Date and time to StdOut
             var date = new Date();
             var month = date.getMonth() + 1;
             var day = date.getDate();
@@ -383,6 +396,7 @@ module TSOS {
             
         }
         public shellLoc() {
+            //prints the Latitude and longitude of the user, obtained from the browser, to StdOut
             var lat: number;
             var lon: number;
           
@@ -395,6 +409,7 @@ module TSOS {
         
         }
         public shellJava() {
+            //just displays a simple coffee cup in StdOut
             _StdOut.putText("           S");
             _StdOut.advanceLine();
             _StdOut.putText("           S  ");
@@ -421,10 +436,12 @@ module TSOS {
         }
 
         public shellStatus(message) {
+            // changes status text in the toolbar at the top of the screen
             var status = document.getElementById("status");
             status.innerText = message;
         }
         public TaskTime() {
+            //Updates the toolbar time
             var time = document.getElementById("time");
             var date = new Date();
             var month = date.getMonth() + 1;
@@ -448,7 +465,51 @@ module TSOS {
             time.innerText = "" + hours + ":" + sMins + tod + "   " + today;
         }
         public shellTrigger() {
+            //triggers an OS error
             _Kernel.krnTrapError("Routine test");
+        }
+        public shellLoad() {
+            //validates user program input and loads it into main memory
+            var input = <HTMLTextAreaElement>document.getElementById("taProgramInput");
+            var hex = [];
+            hex = input.value.split(" ");
+            
+            var reg = new RegExp(/^[0-9a-fA-F]{2}$/);
+            for (var i = 0; i < hex.length; i++) {
+                if (reg.test(hex[i])) {
+                    if (i == (hex.length - 1)) {
+                        break;
+                    }
+                    continue;
+                } else {
+                    
+                    _StdOut.putText("Invalid Input.");
+                    document.getElementById("taProgramInput").style.border = "2px solid red"
+                    return;
+                }
+            }
+            _StdOut.putText("Input Validated.");
+            _StdOut.advanceLine();
+            document.getElementById("taProgramInput").style.border = "2px solid green"
+            _CPU.Assemble(input.value);
+            return;
+        }
+        public shellSpellCheck() {
+            //checks the spelling of commands
+            var com = _Console.buffer;
+            var commands = this.commandList;
+            var suggestions = "";
+            for (var i = 0; i < commands.length; i++) {
+                if (commands[i][0].contains(com.substring(0,1))) {
+                    suggestions += commands[i][0] + " ";
+                } else {
+                    continue;
+                }
+            }
+            return suggestions;
+        }
+        public shellRun() {
+            
         }
            
 

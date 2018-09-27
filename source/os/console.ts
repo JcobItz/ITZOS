@@ -48,6 +48,7 @@ module TSOS {
 
                     this.buffer = "";
                 } else if (chr == String.fromCharCode(8)) {//    Backspace
+                    //handles backspaces and passes pertinent information to the backSpace method
                     var curbuff = this.buffer;
                     var buflen = this.buffer.length - 1;
                     var last = curbuff.charAt(buflen);
@@ -57,11 +58,13 @@ module TSOS {
                     this.buffer = curbuff;
 
                     this.backSpace(off);
-                } else if (chr == String.fromCharCode(9)) {
+                } else if (chr == String.fromCharCode(9)) {//tab key
+                    //captures tab key presses and triggers suggestions method
                     this.suggestions(this.buffer);
 
 
-                } else if (chr == String.fromCharCode(38)) {
+                } else if (chr == String.fromCharCode(38)) {//up arrow
+                    //recalls command history
                     var com = this.lastCommand();
                     _DrawingContext.clearRect(10, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);
                     this.currentXPosition = 10;
@@ -69,7 +72,8 @@ module TSOS {
 
 
 
-                } else if (chr == String.fromCharCode(40)) {
+                } else if (chr == String.fromCharCode(40)) { // down arrow
+                    //cycles forward through command history
                     var com = this.nextCommand();
                     if (com != "") {
                         _DrawingContext.clearRect(10, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);
@@ -92,7 +96,7 @@ module TSOS {
             }
            
         }
-        public suggestions(buff) {
+        public suggestions(buff) {// offers suggestions for the given entry in the console
             var found = false;
             var opts = _OsShell.commandList;
 
@@ -110,7 +114,7 @@ module TSOS {
                 
             }
         }
-        public backSpace(off): void {
+        public backSpace(off): void { //deletes a character and moves currentXPosition
             if (this.currentXPosition <= 0) {
                 this.currentYPosition -= (_DefaultFontSize + _FontHeightMargin + _DrawingContext.fontDescent(this.currentFont, this.currentFontSize));
                 var x = 0;
@@ -141,7 +145,7 @@ module TSOS {
             }
             
         }
-        public lastCommand() {
+        public lastCommand() {//recalls previous command
             
             _OsShell.pointer--;
             this.buffer = _OsShell.history[_OsShell.pointer +1]
@@ -149,7 +153,7 @@ module TSOS {
 
 
         }
-        public nextCommand() {
+        public nextCommand() {//go forward through command history
             _OsShell.pointer++;
             this.buffer = _OsShell.history[_OsShell.pointer];
             return _OsShell.history[_OsShell.pointer];
@@ -168,7 +172,7 @@ module TSOS {
 
             // TODO: Handle scrolling. (iProject 1)
         }
-        public BSOD(msg) {
+        public BSOD(msg) { //Displays blue screen of death and the error that caused it.
             this.clearScreen();
             var screen = document.getElementById("display");
             screen.style.backgroundColor = "#4286f4";

@@ -169,7 +169,8 @@ module TSOS {
                 }
                 //if you reach the end of the command line area, the canvas gets larger and the text is retained.
                 if (y >= _Canvas.height) {
-                   
+                   //saves previous canvas and creates larger canvas
+                    //allows for scrolling
                     var prevDisp = _Canvas.toDataURL('image/png');
                     var img = new Image();
                     img.src = prevDisp;
