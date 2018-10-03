@@ -1,5 +1,4 @@
 /* TSOS.css */
-
 body {
   background: #909193 url(distrib/images/linen.png) repeat;
   font-family: Helvetica, Verdana, Arial, sans-serif;
@@ -34,6 +33,36 @@ h3 {
   background-color:#DFDBC3;
   border: 2px solid red;
   cursor: default;
+}
+.label{
+    width: 15%;
+    text-align: center;
+    height: 50%;
+    border: 1px solid black;
+    float: left;
+    background-color: gray;
+    margin: 0 auto;
+}
+.data {
+    width: 15%;
+    text-align: center;
+    height: 50%;
+    border: 1px solid black;
+    float:left;
+    background-color: white;
+    margin: 0 auto;
+}
+#divCPU{
+    width: 500px;
+    height: 100px;
+}
+#headings{
+    display: inline-block;
+    width: 100%;
+}
+#vals{
+    display: inline-block;
+    width: 100%;
 }
 
 .normal_button {

@@ -25,7 +25,7 @@ module TSOS {
                     public Xreg: number = 0,
                     public Yreg: number = 0,
                     public Zflag: number = 0,
-                    public isExecuting: boolean = false, public MainMem = new Memory()) {
+                    public isExecuting: boolean = false, public MainMem = new Memory(), public processes = []) {
                
         }
 
@@ -37,6 +37,8 @@ module TSOS {
             this.Zflag = 0;
             this.isExecuting = false;
             this.MainMem = new Memory();
+            this.processes = [];
+            
         }
 
         public cycle(): void {
@@ -44,6 +46,23 @@ module TSOS {
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
             this.isExecuting = true;
+            var pcDisp = document.getElementById('PC');
+            pcDisp.innerText = "" + this.PC;
+
+            var irDisp = document.getElementById('IR');
+
+            var accDisp = document.getElementById('Acc');
+            accDisp.innerText = "" + this.Acc;
+
+            var xDisp = document.getElementById('Xreg');
+            xDisp.innerText = "" + this.Xreg;
+
+            var yDisp = document.getElementById('Yreg');
+            yDisp.innerText = "" + this.Yreg;
+
+            var zDisp = document.getElementById('Zflag');
+            zDisp.innerText = "" + this.Zflag;
+
             if (this.MainMem.values["$0000"] != null) {
                 var codes = this.MainMem.values["$0000"];
                 for (var i = 0; i < codes.length; i++) {
@@ -52,7 +71,8 @@ module TSOS {
                     
                 }
             }
-            this.PC++;
+            
+            
             
 
 
@@ -60,7 +80,8 @@ module TSOS {
         }
         public LDA(loc) {
             if (loc.substring(0, 1) == '#') {
-                this.Acc = loc.substring(2);
+                var x = loc.substring(2);
+                this.Acc = +x;
             } else {
                 this.Acc = this.MainMem.values[loc];
             }
@@ -69,6 +90,39 @@ module TSOS {
         }
         public STA(loc) {
             this.MainMem.values[loc] = this.Acc;
+        }
+
+        public ADC(loc) {
+            this.Acc += this.MainMem.values[loc];
+
+        }
+        public LDX(loc) {
+            if (loc.substring(0, 1) == '#') {
+                var x = loc.substring(2);
+                this.Xreg = +x;
+            }
+            this.Xreg = this.MainMem.values[loc];
+        }
+        public LDY(loc) {
+            if (loc.substring(0, 1) == '#') {
+                var x = loc.substring(2);
+                this.Yreg = +x;
+
+            }
+            this.Yreg = this.MainMem.values[loc];
+        }
+        public NOP() {
+
+        }
+        public CPX(loc) {
+            var x = this.Xreg;
+            var y = this.MainMem.values[loc];
+            if (x == y) {
+                this.Zflag = 1;
+            }
+        }
+        public BNE(loc) {
+            
         }
         public Assemble(raw) {
             var codes = [];
@@ -81,6 +135,19 @@ module TSOS {
                     codes[codes.length] = "LDA $" + input[i + 2] + input[i + 1];
                 } else if (input[i] == "8D") {
                     codes[codes.length] = "STA $" + input[i + 2] + input[i + 1];
+                } else if (input[i] == "6D") {
+                    codes[codes.length] = "ADC $" + input[i + 2] + input[i + 1];
+                } else if (input[i] == "A2") {
+                    codes[codes.length] = "LDX #$" + input[i + 1];
+                } else if (input[i] == "AE") {
+                    codes[codes.length] = "LDX $" + input[i + 2] + input[i + 1];
+                } else if (input[i] == "A0") {
+                    codes[codes.length] = "LDY #$" + input[i + 1];
+                } else if (input[i] == "AC") {
+                    codes[codes.length] = "LDY $" + input[i + 2] + input[i + 1];
+                } else if (input[i] == "EC") {
+                    codes[codes.length] = "CPX $" + input[i + 2] + input[i + 1];
+               
                 } else {
                     var reg = new RegExp(/^[0-9]{2}$/);
                     if (!reg.test(input[i])) {
@@ -91,8 +158,8 @@ module TSOS {
                 }
             }
             this.MainMem.put("$0000", codes);
-            var pcb = new PCB();
-            pcb.init(this.PC);
+            var pcb = new PCB(0, this.PC, input[0]);
+            this.processes[this.processes.length] = pcb;
             _StdOut.putText("User Program successfully added to main memory with PID " + pcb.pid);
         }
         
@@ -108,6 +175,8 @@ module TSOS {
         public put(key: string, value: any) {
             var reg = new RegExp(/^$[0-9a-fA-F]{4}$/);
             this.values[key] = value;
+            _StdOut.putText("Value: " + value + " added to memory at: " + key);
+
 
         }
         public get(loc: string): string {
@@ -121,12 +190,16 @@ module TSOS {
 
     }
     class PCB {
-        constructor(public pid = 0) {
+        constructor(public pid = 0, public PC = 0, public IR = "A9") {
 
         }
-        public init(ID) {
-            this.pid = ID;
+
+        public init(id, pc, ir) {
+            this.pid = id;
+            this.PC = pc;
+            this.IR = ir;
         }
+
 
     }
 }
