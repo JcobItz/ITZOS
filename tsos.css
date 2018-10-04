@@ -29,6 +29,32 @@ h3 {
   font-style: normal;
 }
 
+
+#addresses {
+    width: 100%;
+    height: auto;
+    background-color: #96b9f2;
+    border-radius: 5px;
+}
+td{
+    background-color: #fff;
+}
+#divMemory {
+    margin-left: 520px;
+    display: block;
+    background-color: #96b9f2;
+    width: 350px;
+    height: 100px;
+    border-radius: 5px;
+    overflow-y: hidden;
+}
+#memhead {
+    width: 350px;
+    text-align: center;
+    background-color: #96b9f2;
+    
+}
+
 #display {
   background-color:#DFDBC3;
   border: 2px solid red;
@@ -52,15 +78,49 @@ h3 {
     background-color: white;
     margin: 0 auto;
 }
-#divCPU{
-    width: 500px;
-    height: 100px;
+#divCPU {
+    width: 350px;
+    height: 1auto;
+    background-color: #96b9f2;
+    margin-bottom: 10px;
+    border-radius: 5px;
 }
 #headings{
     display: inline-block;
     width: 100%;
 }
 #vals{
+    display: inline-block;
+    width: 100%;
+}
+#divProcesses {
+    width: 350px;
+    height: auto;
+    background-color: #96b9f2;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.head {
+    width: 13%;
+    text-align: center;
+    border: 1px solid black;
+    float: left;
+    background-color: gray;
+    margin: 0 auto;
+}
+.pdata {
+    width: 13%;
+    text-align: center;
+    border: 1px solid black;
+    float: left;
+    background-color: white;
+    margin: 0 auto;
+}
+#Pheadings {
+    display: inline-block;
+    width: 100%;
+}
+#Pvals {
     display: inline-block;
     width: 100%;
 }

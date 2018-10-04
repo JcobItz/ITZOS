@@ -41,8 +41,19 @@ var TSOS;
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
-            this.MainMem = new Memory();
-            this.processes = [];
+            this.MainMem.init();
+            var pcDisp = document.getElementById('PC');
+            pcDisp.innerText = "" + this.PC;
+            var irDisp = document.getElementById('IR');
+            irDisp.innerText = "null";
+            var accDisp = document.getElementById('Acc');
+            accDisp.innerText = "" + this.Acc;
+            var xDisp = document.getElementById('Xreg');
+            xDisp.innerText = "" + this.Xreg;
+            var yDisp = document.getElementById('Yreg');
+            yDisp.innerText = "" + this.Yreg;
+            var zDisp = document.getElementById('Zflag');
+            zDisp.innerText = "" + this.Zflag;
         };
         Cpu.prototype.cycle = function () {
             _Kernel.krnTrace('CPU cycle');
@@ -52,6 +63,7 @@ var TSOS;
             var pcDisp = document.getElementById('PC');
             pcDisp.innerText = "" + this.PC;
             var irDisp = document.getElementById('IR');
+            irDisp.innerText = "" + this.processes[0].IR;
             var accDisp = document.getElementById('Acc');
             accDisp.innerText = "" + this.Acc;
             var xDisp = document.getElementById('Xreg');
@@ -60,13 +72,14 @@ var TSOS;
             yDisp.innerText = "" + this.Yreg;
             var zDisp = document.getElementById('Zflag');
             zDisp.innerText = "" + this.Zflag;
-            if (this.MainMem.values["$0000"] != null) {
-                var codes = this.MainMem.values["$0000"];
+            if (this.MainMem.addresses["$0000"] != null) {
+                var codes = this.MainMem.addresses["$0000"];
                 for (var i = 0; i < codes.length; i++) {
                     var x = codes[i].split(" ");
                     x[0](x[1]);
                 }
             }
+            this.isExecuting = false;
         };
         Cpu.prototype.LDA = function (loc) {
             if (loc.substring(0, 1) == '#') {
@@ -74,41 +87,49 @@ var TSOS;
                 this.Acc = +x;
             }
             else {
-                this.Acc = this.MainMem.values[loc];
+                this.Acc = this.MainMem.addresses[loc][0];
             }
         };
         Cpu.prototype.STA = function (loc) {
-            this.MainMem.values[loc] = this.Acc;
+            this.MainMem.addresses[loc][0] = this.Acc;
         };
         Cpu.prototype.ADC = function (loc) {
-            this.Acc += this.MainMem.values[loc];
+            this.Acc += this.MainMem.addresses[loc][0];
         };
         Cpu.prototype.LDX = function (loc) {
             if (loc.substring(0, 1) == '#') {
                 var x = loc.substring(2);
                 this.Xreg = +x;
             }
-            this.Xreg = this.MainMem.values[loc];
+            else {
+                this.Xreg = this.MainMem.addresses[loc][0];
+            }
         };
         Cpu.prototype.LDY = function (loc) {
             if (loc.substring(0, 1) == '#') {
                 var x = loc.substring(2);
                 this.Yreg = +x;
             }
-            this.Yreg = this.MainMem.values[loc];
+            else {
+                this.Yreg = this.MainMem.addresses[loc][0];
+            }
         };
         Cpu.prototype.NOP = function () {
         };
         Cpu.prototype.CPX = function (loc) {
             var x = this.Xreg;
-            var y = this.MainMem.values[loc];
+            var y = this.MainMem.addresses[loc][0];
             if (x == y) {
                 this.Zflag = 1;
             }
         };
         Cpu.prototype.BNE = function (loc) {
         };
-        Cpu.prototype.Assemble = function (raw) {
+        Cpu.prototype.Fetch = function (input) {
+            var pcb = new PCB(this.processes.length, this.MainMem.next, input.substring(0, 2));
+            this.MainMem.put(this.MainMem.next, input);
+        };
+        Cpu.prototype.Execute = function (raw) {
             var codes = [];
             var input = raw.split(" ");
             for (var i = 0; i < input.length; i++) {
@@ -117,27 +138,45 @@ var TSOS;
                 }
                 else if (input[i] == "AD") {
                     codes[codes.length] = "LDA $" + input[i + 2] + input[i + 1];
+                    i += 3;
                 }
                 else if (input[i] == "8D") {
                     codes[codes.length] = "STA $" + input[i + 2] + input[i + 1];
+                    i += 3;
                 }
                 else if (input[i] == "6D") {
                     codes[codes.length] = "ADC $" + input[i + 2] + input[i + 1];
+                    i += 3;
                 }
                 else if (input[i] == "A2") {
                     codes[codes.length] = "LDX #$" + input[i + 1];
+                    i += 2;
                 }
                 else if (input[i] == "AE") {
                     codes[codes.length] = "LDX $" + input[i + 2] + input[i + 1];
+                    i += 3;
                 }
                 else if (input[i] == "A0") {
                     codes[codes.length] = "LDY #$" + input[i + 1];
+                    i += 2;
                 }
                 else if (input[i] == "AC") {
                     codes[codes.length] = "LDY $" + input[i + 2] + input[i + 1];
+                    i += 3;
                 }
                 else if (input[i] == "EC") {
                     codes[codes.length] = "CPX $" + input[i + 2] + input[i + 1];
+                    i += 3;
+                }
+                else if (input[i] == "00") {
+                    codes[codes.length] = "BRK";
+                }
+                else if (input[i] == "EA") {
+                    codes[codes.length] = "NOP";
+                }
+                else if (input[i] == "D0") {
+                    codes[codes.length] = "BNE $" + input[i + 1];
+                    i += 2;
                 }
                 else {
                     var reg = new RegExp(/^[0-9]{2}$/);
@@ -146,42 +185,103 @@ var TSOS;
                     }
                 }
             }
-            this.MainMem.put("$0000", codes);
-            var pcb = new PCB(0, this.PC, input[0]);
-            this.processes[this.processes.length] = pcb;
-            _StdOut.putText("User Program successfully added to main memory with PID " + pcb.pid);
+            //var pcb = new PCB(0, this.PC, input[0]);
+            // this.processes[this.processes.length] = pcb;
+            // _StdOut.putText("User Program successfully added to main memory with PID " + pcb.pid);
+            var p_pid = document.getElementById("PID");
+            var p_pc = document.getElementById("p_PC");
+            var p_ir = document.getElementById("p_IR");
+            var p_acc = document.getElementById("p_Acc");
+            var p_x = document.getElementById("p_Xreg");
+            var p_y = document.getElementById("p_Yreg");
+            var p_z = document.getElementById("p_Zflag");
+            // p_pid.innerHTML = ""+pcb.pid;
+            // p_pc.innerHTML = ""+pcb.PC;
+            // p_ir.innerHTML = pcb.IR;
+            // p_acc.innerText = "" + 0;
         };
         return Cpu;
     }());
     TSOS.Cpu = Cpu;
     var Memory = /** @class */ (function () {
-        function Memory(values) {
-            if (values === void 0) { values = {}; }
-            this.values = values;
+        function Memory() {
+            this.addresses = new Array(0xeee);
         }
         Memory.prototype.init = function () {
-            var values;
-        };
-        Memory.prototype.put = function (key, value) {
-            var reg = new RegExp(/^$[0-9a-fA-F]{4}$/);
-            this.values[key] = value;
-            _StdOut.putText("Value: " + value + " added to memory at: " + key);
-        };
-        Memory.prototype.get = function (loc) {
-            for (var key in this.values) {
-                if (key == loc) {
-                    return this.values[key];
+            for (var i = 0x000; i < this.addresses.length; i++) {
+                this.addresses[i] = new Array(8);
+                for (var j = 0; j < this.addresses[i].length; j++) {
+                    this.addresses[i][j] = 0x00;
+                }
+                var disp = document.getElementById('addresses');
+                var row = disp.insertRow(disp.rows.length);
+                var loc = row.insertCell(0);
+                loc.innerText = "" + i.toString(16);
+                for (var y = 0; y < 8; y++) {
+                    var cell = row.insertCell(y + 1);
+                    cell.innerHTML = this.addresses[i][y];
                 }
             }
-            return "memory address " + loc + " not found.";
+        };
+        Memory.prototype.put = function (key, value) {
+            var start = key;
+            if (value.length <= 8) {
+                TSOS.Control.hostLog("less than 8");
+                for (var i = 0; i < this.addresses[key].length; i++) {
+                    this.addresses[key][i] = value[i];
+                }
+                TSOS.Control.hostLog("added");
+            }
+            else {
+                var done = false;
+                var j = 0;
+                while (!done) {
+                    for (var i = 0; i < this.addresses[key].length; i++) {
+                        if (i == 7) {
+                            if (j < value.length + 1) {
+                                this.addresses[key][i] = 0xF;
+                            }
+                        }
+                        this.addresses[key][i] = value[j];
+                        j++;
+                    }
+                    if (j < value.length) {
+                        key++;
+                    }
+                }
+            }
+            var disp = document.getElementById('addresses');
+            var row = disp.insertRow(disp.rows.length);
+            var loc = row.insertCell(0);
+            loc.innerHTML = "" + start;
+            for (var i = 0; i < 8; i++) {
+                var cell = row.insertCell(i + 1);
+                cell.innerHTML = this.addresses[start][i];
+            }
+            if (key > start) {
+                start++;
+                while (start <= key) {
+                    var newrow = disp.insertRow(disp.rows.length);
+                    var address = newrow.insertCell(0);
+                    address.innerHTML = "" + start;
+                    for (var i = 0; i < 8; i++) {
+                        var cell = row.insertCell(i + 1);
+                        cell.innerHTML = this.addresses[start][i];
+                    }
+                }
+            }
+        };
+        Memory.prototype.get = function (loc) {
+            return this.addresses[loc];
         };
         return Memory;
     }());
+    TSOS.Memory = Memory;
     var PCB = /** @class */ (function () {
         function PCB(pid, PC, IR) {
             if (pid === void 0) { pid = 0; }
             if (PC === void 0) { PC = 0; }
-            if (IR === void 0) { IR = "A9"; }
+            if (IR === void 0) { IR = 0x000; }
             this.pid = pid;
             this.PC = PC;
             this.IR = IR;

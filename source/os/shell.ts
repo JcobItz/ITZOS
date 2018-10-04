@@ -491,7 +491,7 @@ module TSOS {
             _StdOut.putText("Input Validated.");
             _StdOut.advanceLine();
             document.getElementById("taProgramInput").style.border = "2px solid green"
-            _CPU.Assemble(input.value);
+            _Mem.put(0x000, hex);
             return;
         }
         public shellSpellCheck() {
@@ -508,8 +508,8 @@ module TSOS {
             }
             return suggestions;
         }
-        public shellRun() {
-            
+        public shellRun(PID) {
+            _CPU.Execute(PID);
         }
            
 

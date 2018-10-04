@@ -413,7 +413,7 @@ var TSOS;
             _StdOut.putText("Input Validated.");
             _StdOut.advanceLine();
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _CPU.Assemble(input.value);
+            _Mem.put(0x000, hex);
             return;
         };
         Shell.prototype.shellSpellCheck = function () {
@@ -431,7 +431,8 @@ var TSOS;
             }
             return suggestions;
         };
-        Shell.prototype.shellRun = function () {
+        Shell.prototype.shellRun = function (PID) {
+            _CPU.Execute(PID);
         };
         return Shell;
     }());
