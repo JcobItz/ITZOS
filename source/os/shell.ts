@@ -470,7 +470,7 @@ module TSOS {
         }
         public shellLoad() {
             //validates user program input and loads it into main memory
-            var input = <HTMLTextAreaElement>document.getElementById("taProgramInput");
+            var input = <HTMLTextAreaElement> document.getElementById("taProgramInput");
             var hex = [];
             hex = input.value.split(" ");
             
@@ -484,15 +484,18 @@ module TSOS {
                 } else {
                     
                     _StdOut.putText("Invalid Input.");
-                    document.getElementById("taProgramInput").style.border = "2px solid red"
+                    document.getElementById("taProgramInput").style.border = "2px solid red";
+
+                    
                     return;
                 }
             }
             _StdOut.putText("Input Validated.");
-            _StdOut.advanceLine();
-            document.getElementById("taProgramInput").style.border = "2px solid green"
-            _Mem.put(0x000, hex);
-            return;
+  
+            document.getElementById("taProgramInput").style.border = "2px solid green";
+            _MemoryManager.loadIn(hex, 1);
+           
+            
         }
         public shellSpellCheck() {
             //checks the spelling of commands
@@ -509,7 +512,11 @@ module TSOS {
             return suggestions;
         }
         public shellRun(PID) {
-            _CPU.Execute(PID);
+            var p = <TSOS.PCB>_ProcessManager.processArr[PID];
+            _ProcessManager.running = p;
+            _CPU.PC = p.PC;
+            _CPU.cycle();
+            
         }
            
 

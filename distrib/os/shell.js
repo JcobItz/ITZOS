@@ -411,10 +411,8 @@ var TSOS;
                 }
             }
             _StdOut.putText("Input Validated.");
-            _StdOut.advanceLine();
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _Mem.put(0x000, hex);
-            return;
+            _MemoryManager.loadIn(hex, 1);
         };
         Shell.prototype.shellSpellCheck = function () {
             //checks the spelling of commands
@@ -432,7 +430,10 @@ var TSOS;
             return suggestions;
         };
         Shell.prototype.shellRun = function (PID) {
-            _CPU.Execute(PID);
+            var p = _ProcessManager.processArr[PID];
+            _ProcessManager.running = p;
+            _CPU.PC = p.PC;
+            _CPU.cycle();
         };
         return Shell;
     }());

@@ -16,281 +16,189 @@
 var TSOS;
 (function (TSOS) {
     var Cpu = /** @class */ (function () {
-        function Cpu(PC, Acc, Xreg, Yreg, Zflag, isExecuting, MainMem, processes) {
+        function Cpu(PC, IR, Acc, Xreg, Yreg, Zflag, isExecuting) {
             if (PC === void 0) { PC = 0; }
+            if (IR === void 0) { IR = "00"; }
             if (Acc === void 0) { Acc = 0; }
             if (Xreg === void 0) { Xreg = 0; }
             if (Yreg === void 0) { Yreg = 0; }
             if (Zflag === void 0) { Zflag = 0; }
             if (isExecuting === void 0) { isExecuting = false; }
-            if (MainMem === void 0) { MainMem = new Memory(); }
-            if (processes === void 0) { processes = []; }
             this.PC = PC;
+            this.IR = IR;
             this.Acc = Acc;
             this.Xreg = Xreg;
             this.Yreg = Yreg;
             this.Zflag = Zflag;
             this.isExecuting = isExecuting;
-            this.MainMem = MainMem;
-            this.processes = processes;
         }
         Cpu.prototype.init = function () {
             this.PC = 0;
+            this.IR = "00";
             this.Acc = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
-            this.MainMem.init();
-            var pcDisp = document.getElementById('PC');
-            pcDisp.innerText = "" + this.PC;
-            var irDisp = document.getElementById('IR');
-            irDisp.innerText = "null";
-            var accDisp = document.getElementById('Acc');
-            accDisp.innerText = "" + this.Acc;
-            var xDisp = document.getElementById('Xreg');
-            xDisp.innerText = "" + this.Xreg;
-            var yDisp = document.getElementById('Yreg');
-            yDisp.innerText = "" + this.Yreg;
-            var zDisp = document.getElementById('Zflag');
-            zDisp.innerText = "" + this.Zflag;
         };
         Cpu.prototype.cycle = function () {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
+            this.IR = _MemoryAccessor.readMemory(this.PC);
+            TSOS.Control.updateCPUDisp();
             this.isExecuting = true;
-            var pcDisp = document.getElementById('PC');
-            pcDisp.innerText = "" + this.PC;
-            var irDisp = document.getElementById('IR');
-            irDisp.innerText = "" + this.processes[0].IR;
-            var accDisp = document.getElementById('Acc');
-            accDisp.innerText = "" + this.Acc;
-            var xDisp = document.getElementById('Xreg');
-            xDisp.innerText = "" + this.Xreg;
-            var yDisp = document.getElementById('Yreg');
-            yDisp.innerText = "" + this.Yreg;
-            var zDisp = document.getElementById('Zflag');
-            zDisp.innerText = "" + this.Zflag;
-            if (this.MainMem.addresses["$0000"] != null) {
-                var codes = this.MainMem.addresses["$0000"];
-                for (var i = 0; i < codes.length; i++) {
-                    var x = codes[i].split(" ");
-                    x[0](x[1]);
-                }
-            }
-            this.isExecuting = false;
-        };
-        Cpu.prototype.LDA = function (loc) {
-            if (loc.substring(0, 1) == '#') {
-                var x = loc.substring(2);
-                this.Acc = +x;
+            if (!_MemoryAccessor.isValid(this.PC)) {
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(5, 0));
             }
             else {
-                this.Acc = this.MainMem.addresses[loc][0];
+                var code = _MemoryAccessor.readMemory(this.PC);
+                _Kernel.krnTrace("Executing op code " + code);
+                switch (code) {
+                    case "A9":
+                        //load accumulator with constant which is located in the next memory location 
+                        this.Acc = parseInt(_MemoryAccessor.readMemory(this.PC + 1), 16);
+                        TSOS.Control.hostLog("Setting accumulator to " + _MemoryAccessor.readMemory(this.PC + 1), "CPU");
+                        this.PC += 2;
+                        TSOS.Control.updateCPUDisp();
+                        break;
+                    case "AD":
+                        //load accumulator with a constant stored in memory already
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        var loc = parseInt(hex, 16);
+                        this.Acc = parseInt(_MemoryAccessor.readMemory(loc), 16);
+                        this.PC += 3;
+                        break;
+                    case "8D":
+                        //store accumulator in memory
+                        //first we get the address where they want to store it
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        //get the decimal address
+                        var address = parseInt(hex, 16);
+                        //Acc is displayed as decimal so we need to convert it to hex to store it
+                        var val = this.Acc.toString(16);
+                        _MemoryAccessor.writeMemory(address, val);
+                        TSOS.Control.hostMemory();
+                        this.PC += 3;
+                        break;
+                    case "6D":
+                        //Adds contents of address to the accumulator
+                        //first get the address given by the program
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        //then convert it to decimal address
+                        var address = parseInt(hex, 16);
+                        //then add the number at the given location to the accumulator after you convert it to decimal
+                        this.Acc += parseInt(_MemoryAccessor.readMemory(address), 16);
+                        this.PC += 3;
+                        break;
+                    case "A2":
+                        //load the x register with a constant given by the user
+                        //its stored in hex, so convert it to decimal 
+                        this.Xreg = parseInt(_MemoryAccessor.readMemory(this.PC + 1), 16);
+                        this.PC += 2;
+                        break;
+                    case "AE":
+                        //load X register from memory
+                        //first get the given address
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        //convert to decimal address
+                        var address = parseInt(hex, 16);
+                        //then load it into the register while converting it to decimal
+                        this.Xreg = parseInt(_MemoryAccessor.readMemory(address), 16);
+                        this.PC += 3;
+                        break;
+                    case "A0":
+                        //load the Y register with a constant given by the user
+                        //its stored in hex, so convert it to decimal 
+                        this.Yreg = parseInt(_MemoryAccessor.readMemory(this.PC + 1), 16);
+                        this.PC += 2;
+                        break;
+                    case "AC":
+                        //load Y register from memory
+                        //first get the given address
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        //convert to decimal address
+                        var address = parseInt(hex, 16);
+                        //then load it into the register while converting it to decimal
+                        this.Yreg = parseInt(_MemoryAccessor.readMemory(address), 16);
+                        this.PC += 3;
+                        break;
+                    case "EA":
+                        //no operation, so we just increment the program counter
+                        this.PC++;
+                        break;
+                    case "00":
+                        //break
+                        //system call for exit
+                        this.isExecuting = false;
+                        break;
+                    case "EC":
+                        //compare byte in memory to Xregister, set Zflag is equal
+                        //first get the address given by the user
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        //then convert it to decimal
+                        var address = parseInt(hex, 16);
+                        //then get the value at that address and convert it to decimal
+                        var value = parseInt(_MemoryAccessor.readMemory(address), 16);
+                        //compare it to the Xregister
+                        if (this.Xreg == value) {
+                            this.Zflag = 1;
+                        }
+                        else {
+                            this.Zflag = 0;
+                        }
+                        this.PC += 3;
+                        break;
+                    case "D0":
+                        //branch n bytes if Xflag = 0
+                        if (this.Zflag = 0) {
+                            //first make sure the Zflag is zero
+                            //then get the number of bytes we have to branch
+                            var bytes = parseInt(_MemoryAccessor.readMemory(this.PC + 1), 16);
+                            //then branch the specified number of bytes
+                            this.PC = _MemoryAccessor.BNE(this.PC, bytes);
+                        }
+                        else {
+                            this.PC += 2;
+                        }
+                        break;
+                    case "EE":
+                        //increment the value of a byte
+                        //first get the hex address of the byte
+                        var hex = _MemoryAccessor.readMemory(this.PC + 2);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        //then get the decimal address
+                        var address = parseInt(hex, 16);
+                        //then get the decimal value at that address
+                        var decVal = parseInt(_MemoryAccessor.readMemory(address), 16);
+                        //increment the value
+                        decVal++;
+                        //then convert it back to hex
+                        var hexVal = decVal.toString(16);
+                        //then store it
+                        _MemoryAccessor.writeMemory(address, hexVal);
+                        this.PC += 3;
+                        break;
+                    case "FF":
+                        //system call: if Xreg = 1, print integer stored in Yreg
+                        //if Xreg = 2, print the 00-terminated string stored at the adress in the Yreg
+                        if (this.Xreg == 1) {
+                        }
+                        else if (this.Xreg == 2) {
+                        }
+                        break;
+                }
+                TSOS.Control.updateCPUDisp();
+                TSOS.Control.hostMemory();
             }
-        };
-        Cpu.prototype.STA = function (loc) {
-            this.MainMem.addresses[loc][0] = this.Acc;
-        };
-        Cpu.prototype.ADC = function (loc) {
-            this.Acc += this.MainMem.addresses[loc][0];
-        };
-        Cpu.prototype.LDX = function (loc) {
-            if (loc.substring(0, 1) == '#') {
-                var x = loc.substring(2);
-                this.Xreg = +x;
-            }
-            else {
-                this.Xreg = this.MainMem.addresses[loc][0];
-            }
-        };
-        Cpu.prototype.LDY = function (loc) {
-            if (loc.substring(0, 1) == '#') {
-                var x = loc.substring(2);
-                this.Yreg = +x;
-            }
-            else {
-                this.Yreg = this.MainMem.addresses[loc][0];
-            }
-        };
-        Cpu.prototype.NOP = function () {
-        };
-        Cpu.prototype.CPX = function (loc) {
-            var x = this.Xreg;
-            var y = this.MainMem.addresses[loc][0];
-            if (x == y) {
-                this.Zflag = 1;
-            }
-        };
-        Cpu.prototype.BNE = function (loc) {
-        };
-        Cpu.prototype.Fetch = function (input) {
-            var pcb = new PCB(this.processes.length, this.MainMem.next, input.substring(0, 2));
-            this.MainMem.put(this.MainMem.next, input);
-        };
-        Cpu.prototype.Execute = function (raw) {
-            var codes = [];
-            var input = raw.split(" ");
-            for (var i = 0; i < input.length; i++) {
-                if (input[i] == "A9") {
-                    codes[codes.length] = "LDA #$" + input[i + 1];
-                }
-                else if (input[i] == "AD") {
-                    codes[codes.length] = "LDA $" + input[i + 2] + input[i + 1];
-                    i += 3;
-                }
-                else if (input[i] == "8D") {
-                    codes[codes.length] = "STA $" + input[i + 2] + input[i + 1];
-                    i += 3;
-                }
-                else if (input[i] == "6D") {
-                    codes[codes.length] = "ADC $" + input[i + 2] + input[i + 1];
-                    i += 3;
-                }
-                else if (input[i] == "A2") {
-                    codes[codes.length] = "LDX #$" + input[i + 1];
-                    i += 2;
-                }
-                else if (input[i] == "AE") {
-                    codes[codes.length] = "LDX $" + input[i + 2] + input[i + 1];
-                    i += 3;
-                }
-                else if (input[i] == "A0") {
-                    codes[codes.length] = "LDY #$" + input[i + 1];
-                    i += 2;
-                }
-                else if (input[i] == "AC") {
-                    codes[codes.length] = "LDY $" + input[i + 2] + input[i + 1];
-                    i += 3;
-                }
-                else if (input[i] == "EC") {
-                    codes[codes.length] = "CPX $" + input[i + 2] + input[i + 1];
-                    i += 3;
-                }
-                else if (input[i] == "00") {
-                    codes[codes.length] = "BRK";
-                }
-                else if (input[i] == "EA") {
-                    codes[codes.length] = "NOP";
-                }
-                else if (input[i] == "D0") {
-                    codes[codes.length] = "BNE $" + input[i + 1];
-                    i += 2;
-                }
-                else {
-                    var reg = new RegExp(/^[0-9]{2}$/);
-                    if (!reg.test(input[i])) {
-                        _StdOut.putText("" + input[i] + " is not a valid op code");
-                    }
-                }
-            }
-            //var pcb = new PCB(0, this.PC, input[0]);
-            // this.processes[this.processes.length] = pcb;
-            // _StdOut.putText("User Program successfully added to main memory with PID " + pcb.pid);
-            var p_pid = document.getElementById("PID");
-            var p_pc = document.getElementById("p_PC");
-            var p_ir = document.getElementById("p_IR");
-            var p_acc = document.getElementById("p_Acc");
-            var p_x = document.getElementById("p_Xreg");
-            var p_y = document.getElementById("p_Yreg");
-            var p_z = document.getElementById("p_Zflag");
-            // p_pid.innerHTML = ""+pcb.pid;
-            // p_pc.innerHTML = ""+pcb.PC;
-            // p_ir.innerHTML = pcb.IR;
-            // p_acc.innerText = "" + 0;
         };
         return Cpu;
     }());
     TSOS.Cpu = Cpu;
-    var Memory = /** @class */ (function () {
-        function Memory() {
-            this.addresses = new Array(0xeee);
-        }
-        Memory.prototype.init = function () {
-            for (var i = 0x000; i < this.addresses.length; i++) {
-                this.addresses[i] = new Array(8);
-                for (var j = 0; j < this.addresses[i].length; j++) {
-                    this.addresses[i][j] = 0x00;
-                }
-                var disp = document.getElementById('addresses');
-                var row = disp.insertRow(disp.rows.length);
-                var loc = row.insertCell(0);
-                loc.innerText = "" + i.toString(16);
-                for (var y = 0; y < 8; y++) {
-                    var cell = row.insertCell(y + 1);
-                    cell.innerHTML = this.addresses[i][y];
-                }
-            }
-        };
-        Memory.prototype.put = function (key, value) {
-            var start = key;
-            if (value.length <= 8) {
-                TSOS.Control.hostLog("less than 8");
-                for (var i = 0; i < this.addresses[key].length; i++) {
-                    this.addresses[key][i] = value[i];
-                }
-                TSOS.Control.hostLog("added");
-            }
-            else {
-                var done = false;
-                var j = 0;
-                while (!done) {
-                    for (var i = 0; i < this.addresses[key].length; i++) {
-                        if (i == 7) {
-                            if (j < value.length + 1) {
-                                this.addresses[key][i] = 0xF;
-                            }
-                        }
-                        this.addresses[key][i] = value[j];
-                        j++;
-                    }
-                    if (j < value.length) {
-                        key++;
-                    }
-                }
-            }
-            var disp = document.getElementById('addresses');
-            var row = disp.insertRow(disp.rows.length);
-            var loc = row.insertCell(0);
-            loc.innerHTML = "" + start;
-            for (var i = 0; i < 8; i++) {
-                var cell = row.insertCell(i + 1);
-                cell.innerHTML = this.addresses[start][i];
-            }
-            if (key > start) {
-                start++;
-                while (start <= key) {
-                    var newrow = disp.insertRow(disp.rows.length);
-                    var address = newrow.insertCell(0);
-                    address.innerHTML = "" + start;
-                    for (var i = 0; i < 8; i++) {
-                        var cell = row.insertCell(i + 1);
-                        cell.innerHTML = this.addresses[start][i];
-                    }
-                }
-            }
-        };
-        Memory.prototype.get = function (loc) {
-            return this.addresses[loc];
-        };
-        return Memory;
-    }());
-    TSOS.Memory = Memory;
-    var PCB = /** @class */ (function () {
-        function PCB(pid, PC, IR) {
-            if (pid === void 0) { pid = 0; }
-            if (PC === void 0) { PC = 0; }
-            if (IR === void 0) { IR = 0x000; }
-            this.pid = pid;
-            this.PC = PC;
-            this.IR = IR;
-        }
-        PCB.prototype.init = function (id, pc, ir) {
-            this.pid = id;
-            this.PC = pc;
-            this.IR = ir;
-        };
-        return PCB;
-    }());
 })(TSOS || (TSOS = {}));

@@ -46,7 +46,7 @@ td{
     width: 350px;
     height: 100px;
     border-radius: 5px;
-    overflow-y: hidden;
+    overflow-y: scroll;
 }
 #memhead {
     width: 350px;
