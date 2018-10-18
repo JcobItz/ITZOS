@@ -100,6 +100,15 @@ td{
     margin-bottom: 10px;
     border-radius: 5px;
 }
+#processes{
+    width: 100%;
+    height: auto;
+
+}
+#processes th{
+    width: 12.5%;
+    margin: 0 auto;
+}
 .head {
     width: 13%;
     text-align: center;

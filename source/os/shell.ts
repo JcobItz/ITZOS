@@ -472,28 +472,28 @@ module TSOS {
             //validates user program input and loads it into main memory
             var input = <HTMLTextAreaElement> document.getElementById("taProgramInput");
             var hex = [];
-            hex = input.value.split(" ");
+            hex = input.value.split(" ");//put the op codes into an array
             
             var reg = new RegExp(/^[0-9a-fA-F]{2}$/);
             for (var i = 0; i < hex.length; i++) {
-                if (reg.test(hex[i])) {
+                if (reg.test(hex[i])) {//if they satisfy the regular expression above continue
                     if (i == (hex.length - 1)) {
                         break;
                     }
                     continue;
-                } else {
+                } else { //if they are not validated by the regex then tell the user they are invalid
                     
                     _StdOut.putText("Invalid Input.");
-                    document.getElementById("taProgramInput").style.border = "2px solid red";
+                    document.getElementById("taProgramInput").style.border = "2px solid red";//and change the ta border to red for fun
 
                     
                     return;
                 }
             }
-            _StdOut.putText("Input Validated.");
+            _StdOut.putText("Input Validated.");// if all the codes are valid, tell the user
   
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _MemoryManager.loadIn(hex, 1);
+            _MemoryManager.loadIn(hex, 1);//then load them into memory 
            
             
         }
@@ -512,10 +512,14 @@ module TSOS {
             return suggestions;
         }
         public shellRun(PID) {
-            var p = <TSOS.PCB>_ProcessManager.processArr[PID];
-            _ProcessManager.running = p;
-            _CPU.PC = p.PC;
-            _CPU.cycle();
+            //runs the program with the specified pid
+            var p = <TSOS.PCB>_ProcessManager.processArr[0];//p is the process with the provided pid
+            _ProcessManager.running = p; //tell the process manager it is running
+            _CPU.PC = p.PC;//set the CPU program counter to the location of the process in memory
+            _ProcessManager.processArr[0].State = "Running";
+            Control.updatePCBDisp();
+            _CPU.isExecuting = true;
+            
             
         }
            

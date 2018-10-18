@@ -115,12 +115,42 @@ module TSOS {
                 }
             }
         }
+        public static updatePCBDisp() {
+            //updates the PCB display
+            var table = <HTMLTableElement>document.getElementById('processes');
+            //first remove all the rows from the table so we don't have duplicates
+            for (var x = 1; x < table.rows.length; x++) {
+                table.deleteRow(x);
+            }
+            //then add all of the processes in the processArr to the table
+            for (var i = 0; i < _ProcessManager.processArr.length; i++) {
+                var row = table.insertRow(i + 1);
+                var PID = row.insertCell(0);
+                PID.innerHTML = "" + _ProcessManager.processArr[i].pid;
+                var PC = row.insertCell(1);
+                PC.innerHTML = "" + _ProcessManager.processArr[i].PC;
+                var IR = row.insertCell(2);
+                IR.innerHTML = "" + _ProcessManager.processArr[i].IR;
+                var Acc = row.insertCell(3);
+                Acc.innerHTML = "" + _ProcessManager.processArr[i].Acc;
+                var Xreg = row.insertCell(4);
+                Xreg.innerHTML = "" + _ProcessManager.processArr[i].Xreg;
+                var Yreg = row.insertCell(5);
+                Yreg.innerHTML = "" + _ProcessManager.processArr[i].Yreg;
+                var Zflag = row.insertCell(6);
+                Zflag.innerHTML = "" + _ProcessManager.processArr[i].Zflag;
+                var State = row.insertCell(7);
+                State.innerHTML = "" + _ProcessManager.processArr[i].State;
+
+            }
+        }
         public static updateCPUDisp() {
+            //updates the CPU display with the current data
             var pcDisp = document.getElementById('PC');
             pcDisp.innerHTML = "" + _CPU.PC;
 
             var irDisp = document.getElementById('IR');
-            irDisp.innerHTML = "null";
+            irDisp.innerHTML = "" + _CPU.IR;
 
             var accDisp = document.getElementById('Acc');
             accDisp.innerHTML = "" + _CPU.Acc;

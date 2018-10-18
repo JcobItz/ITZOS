@@ -2,9 +2,11 @@ var TSOS;
 (function (TSOS) {
     var PCB = /** @class */ (function () {
         function PCB(processID) {
+            //makes a new PCB with specified pid
             this.pid = processID;
         }
         PCB.prototype.init = function (part, start, end) {
+            //initializes the rest of the PCB data
             this.State = "Ready";
             this.PC = start;
             this.IR = "00";

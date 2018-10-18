@@ -49,6 +49,7 @@ module TSOS {
             // Do the real work here. Be sure to set this.isExecuting appropriately.
             this.IR = _MemoryAccessor.readMemory(this.PC);
             Control.updateCPUDisp();
+            Control.updatePCBDisp();
             this.isExecuting = true;
             if (!_MemoryAccessor.isValid(this.PC)) {
                 _KernelInterruptQueue.enqueue(new Interrupt(5, 0));
@@ -142,7 +143,13 @@ module TSOS {
                     case "00":
                         //break
                         //system call for exit
+                        //set isExecuting to false
                         this.isExecuting = false;
+                        //change process state to complete
+                        _ProcessManager.processArr[_ProcessManager.processArr.indexOf(_ProcessManager.currentProcess())].State = "Completed";
+                        //remove the process
+                        _ProcessManager.remove(_ProcessManager.currentProcess());
+                        Control.updatePCBDisp();
                         
                         break;
                     case "EC":
@@ -206,8 +213,12 @@ module TSOS {
                         break;
                     
                 }
+                //update CPU and Memory displays
+                _ProcessManager.updatePCB();
+                
                 Control.updateCPUDisp();
                 Control.hostMemory();
+                Control.updatePCBDisp();
                 
                 
 

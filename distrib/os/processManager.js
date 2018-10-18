@@ -15,28 +15,30 @@ var TSOS;
             return this.processArr.length;
         };
         processManager.prototype.load = function (p) {
-            this.processArr[this.size()] = p;
-            var pid = document.getElementById("PID");
-            var pc = document.getElementById("p_PC");
-            var ir = document.getElementById("p_IR");
-            var acc = document.getElementById("p_Acc");
-            var x = document.getElementById("p_Xreg");
-            var y = document.getElementById("p_Yreg");
-            var z = document.getElementById("p_Zflag");
-            pid.innerHTML = p.pid;
-            pc.innerHTML = p.PC;
-            ir.innerHTML = p.IR;
-            acc.innerHTML = p.Acc;
-            x.innerHTML = p.Xreg;
-            y.innerHTML = p.Yreg;
-            z.innerHTML = p.Zflag;
+            this.processArr[this.processArr.length] = p;
+            TSOS.Control.updatePCBDisp();
         };
         processManager.prototype.remove = function (p) {
-            this.processArr[0] = null;
+            this.running = void 0;
             this.processArr.shift();
+            TSOS.Control.updatePCBDisp();
         };
         processManager.prototype.currentProcess = function () {
             return this.running;
+        };
+        processManager.prototype.updatePCB = function () {
+            var processes = "";
+            for (var i = 0; i < this.processArr.length; i++) {
+                processes += this.processArr[i].pid + " ";
+            }
+            TSOS.Control.hostLog(processes, "Process Manager");
+            var p = this.processArr[this.processArr.indexOf(this.running)];
+            p.PC = _CPU.PC;
+            p.IR = _CPU.IR;
+            p.Acc = _CPU.Acc;
+            p.Xreg = _CPU.Xreg;
+            p.Yreg = _CPU.Yreg;
+            p.Zflag = _CPU.Zflag;
         };
         return processManager;
     }());

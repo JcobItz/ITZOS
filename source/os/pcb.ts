@@ -13,10 +13,12 @@ module TSOS {
         public end;
 
         public constructor(processID) {
+            //makes a new PCB with specified pid
             this.pid = processID;
 
         }
         public init(part, start, end) {
+            //initializes the rest of the PCB data
             this.State = "Ready";
             this.PC = start;
             this.IR = "00";
@@ -28,6 +30,7 @@ module TSOS {
             this.begin = start;
             this.end = start + end;
         }
+
 
     }
 }
