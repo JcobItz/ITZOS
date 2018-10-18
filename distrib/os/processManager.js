@@ -6,27 +6,29 @@ var TSOS;
             if (running === void 0) { running = void 0; }
             this.processArr = processArr;
             this.running = running;
+            //creates an empty array of PCBS
             this.processArr = new Array();
         }
         processManager.prototype.init = function () {
             this.processArr = new Array();
         };
-        processManager.prototype.size = function () {
-            return this.processArr.length;
-        };
         processManager.prototype.load = function (p) {
+            //sets the running process to the requested process
             this.processArr[this.processArr.length] = p;
             TSOS.Control.updatePCBDisp();
         };
         processManager.prototype.remove = function (p) {
+            //removes a PCB from the array of PCBS and updates the PCB display
             this.running = void 0;
             this.processArr.shift();
             TSOS.Control.updatePCBDisp();
         };
         processManager.prototype.currentProcess = function () {
+            //returns the current running process
             return this.running;
         };
         processManager.prototype.updatePCB = function () {
+            //updates the Data in the PCB
             var processes = "";
             for (var i = 0; i < this.processArr.length; i++) {
                 processes += this.processArr[i].pid + " ";
