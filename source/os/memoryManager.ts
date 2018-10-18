@@ -25,7 +25,7 @@ module TSOS {
             }
             this.partitions[part].isEmpty = false;//set the empty indicator accordingly
             Control.hostMemory();//update memory 
-            var p = new PCB(_ProcessManager.size());// create new pcb object
+            var p = new PCB(_ProcessManager.processArr.length);// create new pcb object
             //TODO: update PCB display
             p.init(1, 0, codes.size);//initialize the pcb
             _ProcessManager.load(p);//load it into the process manager
