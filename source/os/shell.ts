@@ -493,7 +493,7 @@ module TSOS {
             _StdOut.putText("Input Validated.");// if all the codes are valid, tell the user
   
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _MemoryManager.loadIn(hex, 1);//then load them into memory 
+            _MemoryManager.loadIn(hex);//then load them into memory 
            
             
         }

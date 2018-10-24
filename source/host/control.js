@@ -62,6 +62,91 @@ var TSOS;
             taLog.value = str + taLog.value;
             // TODO in the future: Optionally update a log database or some streaming service.
         };
+        Control.hostMemory = function () {
+            var table = document.getElementById('addresses');
+            var pointer = 0;
+            for (var i = 0; i < table.rows.length; i++) {
+                for (var j = 1; j < 9; j++) {
+                    table.rows[i].cells.item(j).innerHTML = _Mem.memoryArr[pointer].toString().toUpperCase();
+                    table.rows[i].cells.item(j).style.color = "black";
+                    table.rows[i].cells.item(j).style['font-weight'] = "normal";
+                    // Check to see if the hex needs a leading zero.
+                    // If it does, then convert the hex to decimal, then back to hex, and add a leading zero.
+                    // We do that seemingly dumb step because if the value stored in memory already has a leading 0, will make display look gross.
+                    var dec = parseInt(_Mem.memoryArr[pointer].toString(), 16);
+                    if (dec < 16 && dec > 0) {
+                        table.rows[i].cells.item(j).innerHTML = "0" + dec.toString(16).toUpperCase();
+                    }
+                    pointer++;
+                }
+            }
+        };
+        Control.initMemDisplay = function () {
+            var table = document.getElementById('addresses');
+            // We assume each row will hold 8 memory values
+            for (var i = 0; i < _Mem.memoryArr.length / 8; i++) {
+                var row = table.insertRow(i);
+                var memoryAddrCell = row.insertCell(0);
+                var address = i * 8;
+                // Display address in proper memory hex notation
+                // Adds leading 0s if necessary
+                var displayAddress = "0x";
+                for (var k = 0; k < 3 - address.toString(16).length; k++) {
+                    displayAddress += "0";
+                }
+                displayAddress += address.toString(16).toUpperCase();
+                memoryAddrCell.innerHTML = displayAddress;
+                // Fill all the cells with 00s
+                for (var j = 1; j < 9; j++) {
+                    var cell = row.insertCell(j);
+                    cell.innerHTML = "00";
+                    cell.classList.add("memoryCell");
+                }
+            }
+        };
+        Control.updatePCBDisp = function () {
+            //updates the PCB display
+            var table = document.getElementById('processes');
+            //first remove all the rows from the table so we don't have duplicates
+            for (var x = 1; x < table.rows.length; x++) {
+                table.deleteRow(x);
+            }
+            //then add all of the processes in the processArr to the table
+            for (var i = 0; i < _ProcessManager.processArr.length; i++) {
+                var row = table.insertRow(i + 1);
+                var PID = row.insertCell(0);
+                PID.innerHTML = "" + _ProcessManager.processArr[i].pid;
+                var PC = row.insertCell(1);
+                PC.innerHTML = "" + _ProcessManager.processArr[i].PC;
+                var IR = row.insertCell(2);
+                IR.innerHTML = "" + _ProcessManager.processArr[i].IR;
+                var Acc = row.insertCell(3);
+                Acc.innerHTML = "" + _ProcessManager.processArr[i].Acc;
+                var Xreg = row.insertCell(4);
+                Xreg.innerHTML = "" + _ProcessManager.processArr[i].Xreg;
+                var Yreg = row.insertCell(5);
+                Yreg.innerHTML = "" + _ProcessManager.processArr[i].Yreg;
+                var Zflag = row.insertCell(6);
+                Zflag.innerHTML = "" + _ProcessManager.processArr[i].Zflag;
+                var State = row.insertCell(7);
+                State.innerHTML = "" + _ProcessManager.processArr[i].State;
+            }
+        };
+        Control.updateCPUDisp = function () {
+            //updates the CPU display with the current data
+            var pcDisp = document.getElementById('PC');
+            pcDisp.innerHTML = "" + _CPU.PC;
+            var irDisp = document.getElementById('IR');
+            irDisp.innerHTML = "" + _CPU.IR;
+            var accDisp = document.getElementById('Acc');
+            accDisp.innerHTML = "" + _CPU.Acc;
+            var xDisp = document.getElementById('Xreg');
+            xDisp.innerHTML = "" + _CPU.Xreg;
+            var yDisp = document.getElementById('Yreg');
+            yDisp.innerHTML = "" + _CPU.Yreg;
+            var zDisp = document.getElementById('Zflag');
+            zDisp.innerHTML = "" + _CPU.Zflag;
+        };
         //
         // Host Events
         //
@@ -76,6 +161,14 @@ var TSOS;
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+            this.updateCPUDisp();
+            _Mem = new TSOS.Memory();
+            _Mem.init();
+            this.hostMemory();
+            this.initMemDisplay();
+            _MemoryAccessor = new TSOS.memoryAccessor();
+            _MemoryManager = new TSOS.memoryManager();
+            _ProcessManager = new TSOS.processManager();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.

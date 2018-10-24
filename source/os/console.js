@@ -29,7 +29,6 @@ var TSOS;
         Console.prototype.init = function () {
             this.clearScreen();
             this.resetXY();
-            ;
         };
         Console.prototype.clearScreen = function () {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
@@ -51,6 +50,7 @@ var TSOS;
                     this.buffer = "";
                 }
                 else if (chr == String.fromCharCode(8)) { //    Backspace
+                    //handles backspaces and passes pertinent information to the backSpace method
                     var curbuff = this.buffer;
                     var buflen = this.buffer.length - 1;
                     var last = curbuff.charAt(buflen);
@@ -59,16 +59,19 @@ var TSOS;
                     this.buffer = curbuff;
                     this.backSpace(off);
                 }
-                else if (chr == String.fromCharCode(9)) {
+                else if (chr == String.fromCharCode(9)) { //tab key
+                    //captures tab key presses and triggers suggestions method
                     this.suggestions(this.buffer);
                 }
-                else if (chr == String.fromCharCode(38)) {
+                else if (chr == String.fromCharCode(38)) { //up arrow
+                    //recalls command history
                     var com = this.lastCommand();
                     _DrawingContext.clearRect(10, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);
                     this.currentXPosition = 10;
                     this.putText(com);
                 }
-                else if (chr == String.fromCharCode(40)) {
+                else if (chr == String.fromCharCode(40)) { // down arrow
+                    //cycles forward through command history
                     var com = this.nextCommand();
                     if (com != "") {
                         _DrawingContext.clearRect(10, this.currentYPosition - _DefaultFontSize, _Canvas.width, _Canvas.height);

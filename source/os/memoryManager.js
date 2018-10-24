@@ -67,3 +67,4 @@ var TSOS;
     }());
     TSOS.memoryManager = memoryManager;
 })(TSOS || (TSOS = {}));
+//# sourceMappingURL=memoryManager.js.map
