@@ -3,7 +3,7 @@ module TSOS {
         
         public readMemory(loc){
             if (this.isValid(loc)) {
-                return _Mem.memoryArr[loc + _MemoryManager.partitions[1].base];
+                return _Mem.memoryArr[_ProcessManager.running.partition.base + loc];
             }
         }
         public writeMemory(loc, val) {
@@ -15,7 +15,7 @@ module TSOS {
 
                 }
 
-                _Mem.memoryArr[_MemoryManager.partitions[_MemoryManager.nextAvailable()].base + loc] = val;
+                _Mem.memoryArr[_ProcessManager.running.partition.base + loc] = val;
 
             } else {
                 _Kernel.krnTrapError("Invalid Memory Location");
@@ -27,12 +27,12 @@ module TSOS {
             }
         }
         public BNE(pc, bytes) {
-            return (pc + bytes + 2) % _MemoryManager.getLimit(1);
+            return (pc + bytes + 2) % _MemoryManager.getLimit(0);
 
         }
         public isValid(loc): boolean {
             
-            if (loc + _MemoryManager.getBase(1) < _MemoryManager.getBase(1) + _MemoryManager.getLimit(1) && loc + _MemoryManager.getBase(1)>= _MemoryManager.getBase(1)) {
+            if (loc + _MemoryManager.getBase(0) < _MemoryManager.getBase(0) + _MemoryManager.getLimit(0) && loc + _MemoryManager.getBase(0)>= _MemoryManager.getBase(0)) {
                 return true;
             } else {
                 return false;

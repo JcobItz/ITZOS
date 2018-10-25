@@ -525,16 +525,18 @@ module TSOS {
                     suggestions += commands[i][0] + " ";
                 } else {
                     continue;
+
                 }
             }
             return suggestions;
         }
         public shellRun(PID) {
             //runs the program with the specified pid
-            var p = <TSOS.PCB>_ProcessManager.resident[0];//p is the process with the provided pid
+            var p = <TSOS.PCB>_ProcessManager.resident[PID];//p is the process with the provided pid
             _ProcessManager.running = p; //tell the process manager it is running
             _CPU.PC = p.PC;//set the CPU program counter to the location of the process in memory
-            _ProcessManager.resident[0].State = "Running";
+            _ProcessManager.resident[PID].State = "Running";
+
             Control.updatePCBDisp();
             _CPU.isExecuting = true;
             

@@ -448,10 +448,10 @@ var TSOS;
         };
         Shell.prototype.shellRun = function (PID) {
             //runs the program with the specified pid
-            var p = _ProcessManager.resident[0]; //p is the process with the provided pid
+            var p = _ProcessManager.resident[PID]; //p is the process with the provided pid
             _ProcessManager.running = p; //tell the process manager it is running
             _CPU.PC = p.PC; //set the CPU program counter to the location of the process in memory
-            _ProcessManager.resident[0].State = "Running";
+            _ProcessManager.resident[PID].State = "Running";
             TSOS.Control.updatePCBDisp();
             _CPU.isExecuting = true;
         };

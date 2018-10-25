@@ -26,7 +26,7 @@ module TSOS {
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
-            this.partition = part;
+            this.partition = _MemoryManager.partitions[part];
             this.begin = start;
             this.end = start + end;
         }

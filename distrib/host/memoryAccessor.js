@@ -5,7 +5,7 @@ var TSOS;
         }
         memoryAccessor.prototype.readMemory = function (loc) {
             if (this.isValid(loc)) {
-                return _Mem.memoryArr[loc + _MemoryManager.partitions[1].base];
+                return _Mem.memoryArr[_ProcessManager.running.partition.base + loc];
             }
         };
         memoryAccessor.prototype.writeMemory = function (loc, val) {
@@ -14,7 +14,7 @@ var TSOS;
                 if (parseInt(val, 16) < 16) {
                     val = "0" + val;
                 }
-                _Mem.memoryArr[_MemoryManager.partitions[_MemoryManager.nextAvailable()].base + loc] = val;
+                _Mem.memoryArr[_ProcessManager.running.partition.base + loc] = val;
             }
             else {
                 _Kernel.krnTrapError("Invalid Memory Location");
@@ -26,10 +26,10 @@ var TSOS;
             }
         };
         memoryAccessor.prototype.BNE = function (pc, bytes) {
-            return (pc + bytes + 2) % _MemoryManager.getLimit(1);
+            return (pc + bytes + 2) % _MemoryManager.getLimit(0);
         };
         memoryAccessor.prototype.isValid = function (loc) {
-            if (loc + _MemoryManager.getBase(1) < _MemoryManager.getBase(1) + _MemoryManager.getLimit(1) && loc + _MemoryManager.getBase(1) >= _MemoryManager.getBase(1)) {
+            if (loc + _MemoryManager.getBase(0) < _MemoryManager.getBase(0) + _MemoryManager.getLimit(0) && loc + _MemoryManager.getBase(0) >= _MemoryManager.getBase(0)) {
                 return true;
             }
             else {

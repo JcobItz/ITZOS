@@ -11,8 +11,8 @@ module TSOS {
         }
         //loads program into memory
         public loadIn(codes) {
-            var part = this.partitions[this.nextAvailable()];//this is the next available memory location
-            var next = part.base;
+            var part =this.nextAvailable();//this is the next available memory location
+            var next = this.partitions[part].base;
             var start = next;//save the starting location of the first op code
             for (var i = 0; i < codes.length; i++) {
                 var op_code = codes[i];
@@ -21,12 +21,12 @@ module TSOS {
                 next++;//increment the next available location pointer
             }
             //fill the remaining space in the partition with zeros
-            for (var j = next; j < part.base + part.limit; j++) {
+            for (var j = next; j < this.partitions[part].base + this.partitions[part].limit; j++) {
                 _Mem.memoryArr[j] = "00";
             }
-            part.isEmpty = false;//set the empty indicator accordingly
+            this.partitions[part].isEmpty = false;//set the empty indicator accordingly
             Control.hostMemory();//update memory 
-            var p = new PCB(_ProcessManager.processArr.length);// create new pcb object
+            var p = new PCB(_ProcessManager.resident.length);// create new pcb object
             //TODO: update PCB display
             p.init(part, start, codes.size);//initialize the pcb
             _ProcessManager.load(p);//load it into the process manager
