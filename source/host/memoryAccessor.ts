@@ -15,11 +15,15 @@ module TSOS {
 
                 }
 
-                _Mem.memoryArr[_MemoryManager.partitions[1].base + loc] = val;
+                _Mem.memoryArr[_MemoryManager.partitions[_MemoryManager.nextAvailable()].base + loc] = val;
 
             } else {
                 _Kernel.krnTrapError("Invalid Memory Location");
 
+            }
+        } public overWriteAll() {
+            for (var i = 0; i < _Mem.memoryArr.length; i++) {
+                _Mem.memoryArr[i] = '00';
             }
         }
         public BNE(pc, bytes) {
