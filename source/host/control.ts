@@ -122,26 +122,38 @@ module TSOS {
             for (var x = 1; x < table.rows.length; x++) {
                 table.deleteRow(x);
             }
-            //then add all of the processes in the processArr to the table
-            for (var i = 0; i < _ProcessManager.processArr.length; i++) {
-                var row = table.insertRow(i + 1);
-                var PID = row.insertCell(0);
-                PID.innerHTML = "" + _ProcessManager.processArr[i].pid;
-                var PC = row.insertCell(1);
-                PC.innerHTML = "" + _ProcessManager.processArr[i].PC;
-                var IR = row.insertCell(2);
-                IR.innerHTML = "" + _ProcessManager.processArr[i].IR;
-                var Acc = row.insertCell(3);
-                Acc.innerHTML = "" + _ProcessManager.processArr[i].Acc;
-                var Xreg = row.insertCell(4);
-                Xreg.innerHTML = "" + _ProcessManager.processArr[i].Xreg;
-                var Yreg = row.insertCell(5);
-                Yreg.innerHTML = "" + _ProcessManager.processArr[i].Yreg;
-                var Zflag = row.insertCell(6);
-                Zflag.innerHTML = "" + _ProcessManager.processArr[i].Zflag;
-                var State = row.insertCell(7);
-                State.innerHTML = "" + _ProcessManager.processArr[i].State;
+            //then add all of the processes in the resident to the table
+            var p = new Array<TSOS.PCB>();
+            //put the resident queue into an array 
+            for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
+                p.push(_ProcessManager.residentQueue.dequeue());
+            }
+            //then loop throught the array to update add each pcb to the table
+            for (var i = 0; i < p.length; i++) {
+                if (!_ProcessManager.residentQueue[i] == void 0) {
 
+
+                    var row = table.insertRow(i + 1);
+                    var PID = row.insertCell(0);
+                    PID.innerHTML = "" + _ProcessManager.residentQueue[i].pid;
+                    var PC = row.insertCell(1);
+                    PC.innerHTML = "" + _ProcessManager.residentQueue[i].PC;
+                    var IR = row.insertCell(2);
+                    IR.innerHTML = "" + _ProcessManager.residentQueue[i].IR;
+                    var Acc = row.insertCell(3);
+                    Acc.innerHTML = "" + _ProcessManager.residentQueue[i].Acc;
+                    var Xreg = row.insertCell(4);
+                    Xreg.innerHTML = "" + _ProcessManager.residentQueue[i].Xreg;
+                    var Yreg = row.insertCell(5);
+                    Yreg.innerHTML = "" + _ProcessManager.residentQueue[i].Yreg;
+                    var Zflag = row.insertCell(6);
+                    Zflag.innerHTML = "" + _ProcessManager.residentQueue[i].Zflag;
+                    var State = row.insertCell(7);
+                    State.innerHTML = "" + _ProcessManager.residentQueue[i].State;
+                }
+            }
+            for (var i = 0; i < p.length; i++) {
+                _ProcessManager.residentQueue.enqueue(p[i]);
             }
         }
         public static updateCPUDisp() {
@@ -168,6 +180,7 @@ module TSOS {
         //
         // Host Events
         //
+        
         public static hostBtnStartOS_click(btn): void {
             // Disable the (passed-in) start button...
             btn.disabled = true;
@@ -192,6 +205,9 @@ module TSOS {
             _MemoryAccessor = new memoryAccessor();
             _MemoryManager = new memoryManager();
             _ProcessManager = new processManager();
+
+            _CPUScheduler = new TSOS.CPUscheduler();
+
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.

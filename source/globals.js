@@ -16,13 +16,14 @@ var CPU_CLOCK_INTERVAL = 100; // This is in ms (milliseconds) so 1000 = 1 second
 var TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 var KEYBOARD_IRQ = 1;
-//
-// Global Variables
-// TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
-//
-var _CPU; // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
-var _OSclock = 0; // Page 23.
+var CONTEXT_SWITCH = 2;
+var PC_OUT_OF_BOUNDS = 3;
+var EXIT_PROCESS = 4;
+var RUNALL = false;
+var _RunningPartition = 0;
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
+var _CPU;
+var _OSclock = 0;
 var _Mem;
 var _MemoryManager;
 var _MemoryAccessor;
@@ -32,6 +33,8 @@ var _DefaultFontFamily = "sans"; // Ignored, I think. The was just a place-holde
 var _DefaultFontSize = 13;
 var _FontHeightMargin = 4; // Additional space added to font size when advancing a line.
 var _ProcessManager;
+var _PID = 0;
+var _CPUScheduler;
 var _Trace = true; // Default the OS trace to be on.
 // The OS Kernel and its queues.
 var _Kernel;

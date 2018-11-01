@@ -76,6 +76,12 @@ var TSOS;
             //run
             sc = new TSOS.ShellCommand(this.shellRun, "run", " - runs program in memory location $0000");
             this.commandList[this.commandList.length] = sc;
+            //clearMem
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", " - clears the entire memory array");
+            this.commandList[this.commandList.length] = sc;
+            //runAll
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", " - runs all programs in the ready Queue");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -252,6 +258,20 @@ var TSOS;
                     case "date":
                         _StdOut.putText("Displays the current date and time.");
                         break;
+                    case "whereami":
+                        _StdOut.putText("Returns the latitude and longitude coordinates of IP address.");
+                    case "java":
+                        _StdOut.putText("Prints a picture of a coffee cup.");
+                    case "status":
+                        _StdOut.putText("Syntax: status <string> - changes the message on the toolbar at the top of the screen.");
+                    case "trigger":
+                        _StdOut.putText("Triggers an error which triggers a blue screen of death.");
+                    case "load":
+                        _StdOut.putText("Validates a user program and loads it into memory.");
+                    case "run":
+                        _StdOut.putText("Syntax: run <pid> - runs the process with the specified pid.");
+                    case "clearmem":
+                        _StdOut.putText("Clears all memory locations.");
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -412,7 +432,7 @@ var TSOS;
             }
             _StdOut.putText("Input Validated."); // if all the codes are valid, tell the user
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _MemoryManager.loadIn(hex); //then load them into memory 
+            _ProcessManager.createProcess(hex); //then load them into memory 
         };
         Shell.prototype.shellSpellCheck = function () {
             //checks the spelling of commands
@@ -431,12 +451,29 @@ var TSOS;
         };
         Shell.prototype.shellRun = function (PID) {
             //runs the program with the specified pid
-            var p = _ProcessManager.processArr[0]; //p is the process with the provided pid
-            _ProcessManager.running = p; //tell the process manager it is running
-            _CPU.PC = p.PC; //set the CPU program counter to the location of the process in memory
-            _ProcessManager.processArr[0].State = "Running";
+            for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
+                var p = _ProcessManager.residentQueue.dequeue();
+                if (p.pid == PID) {
+                    _ProcessManager.readyQueue.enqueue(p);
+                }
+                else {
+                    _ProcessManager.residentQueue.enqueue(p);
+                }
+            }
+            _ProcessManager.run();
             TSOS.Control.updatePCBDisp();
-            _CPU.isExecuting = true;
+        };
+        Shell.prototype.shellClearMem = function () {
+            _MemoryManager.clearMem();
+            TSOS.Control.hostMemory();
+        };
+        Shell.prototype.shellRunAll = function () {
+        };
+        Shell.prototype.shellPs = function () {
+        };
+        Shell.prototype.shellKill = function (pid) {
+        };
+        Shell.prototype.shellQuantum = function (q) {
         };
         return Shell;
     }());

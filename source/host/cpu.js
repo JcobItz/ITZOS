@@ -46,15 +46,16 @@ var TSOS;
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
             this.IR = _MemoryAccessor.readMemory(this.PC);
+            TSOS.Control.hostLog(_MemoryManager.partitions[_ProcessManager.running.partition].base + this.PC);
             TSOS.Control.updateCPUDisp();
             TSOS.Control.updatePCBDisp();
             this.isExecuting = true;
             if (!_MemoryAccessor.isValid(this.PC)) {
-                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(5, 0));
+                _KernelInterruptQueue.enqueue(PC_OUT_OF_BOUNDS, 0);
             }
             else {
                 var code = _MemoryAccessor.readMemory(this.PC);
-                _Kernel.krnTrace("Executing op code " + code);
+                _Kernel.krnTrace("Executing op code " + code + "at " + this.PC);
                 switch (code) {
                     case "A9":
                         //load accumulator with constant which is located in the next memory location 
@@ -139,9 +140,9 @@ var TSOS;
                         //set isExecuting to false
                         this.isExecuting = false;
                         //change process state to complete
-                        _ProcessManager.processArr[_ProcessManager.processArr.indexOf(_ProcessManager.currentProcess())].State = "Completed";
+                        //_ProcessManager.updatePCB(_ProcessManager.running);
                         //remove the process
-                        _ProcessManager.remove(_ProcessManager.currentProcess());
+                        _ProcessManager.running = void 0;
                         TSOS.Control.updatePCBDisp();
                         break;
                     case "EC":
@@ -202,7 +203,6 @@ var TSOS;
                         break;
                 }
                 //update CPU and Memory displays
-                _ProcessManager.updatePCB();
                 TSOS.Control.updateCPUDisp();
                 TSOS.Control.hostMemory();
                 TSOS.Control.updatePCBDisp();

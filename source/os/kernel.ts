@@ -79,7 +79,7 @@ module TSOS {
                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.                           */
-
+            _OsShell.TaskTime();
             // Check for an interrupt, are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
@@ -126,6 +126,12 @@ module TSOS {
                     _krnKeyboardDriver.isr(params);   // Kernel mode device driver
                     _StdIn.handleInput();
                     break;
+            
+                    
+                case CONTEXT_SWITCH:
+                    _CPUScheduler.saveContext();
+                    _CPUScheduler.switchContext();
+
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

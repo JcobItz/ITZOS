@@ -4,17 +4,17 @@ var TSOS;
         function memoryAccessor() {
         }
         memoryAccessor.prototype.readMemory = function (loc) {
-            if (this.isValid(loc)) {
-                return _Mem.memoryArr[_ProcessManager.running.partition.base + loc];
+            if (this.isValid(_MemoryManager.partitions[_ProcessManager.running.partition].base + loc)) {
+                return _Mem.memoryArr[_MemoryManager.partitions[_ProcessManager.running.partition].base + loc];
             }
         };
         memoryAccessor.prototype.writeMemory = function (loc, val) {
-            if (this.isValid(loc)) {
+            if (this.isValid(_RunningPartition + loc)) {
                 TSOS.Control.hostLog("valid memory Location", "MemoryAccessor");
                 if (parseInt(val, 16) < 16) {
                     val = "0" + val;
                 }
-                _Mem.memoryArr[_ProcessManager.running.partition.base + loc] = val;
+                _Mem.memoryArr[_MemoryManager.partitions[_RunningPartition].base + loc] = val;
             }
             else {
                 _Kernel.krnTrapError("Invalid Memory Location");
@@ -26,10 +26,10 @@ var TSOS;
             }
         };
         memoryAccessor.prototype.BNE = function (pc, bytes) {
-            return (pc + bytes + 2) % _MemoryManager.getLimit(0);
+            return (pc + bytes + 2) % _MemoryManager.getLimit(_ProcessManager.running.partition);
         };
         memoryAccessor.prototype.isValid = function (loc) {
-            if (loc + _MemoryManager.getBase(0) < _MemoryManager.getBase(0) + _MemoryManager.getLimit(0) && loc + _MemoryManager.getBase(0) >= _MemoryManager.getBase(0)) {
+            if (loc + _MemoryManager.getBase(_ProcessManager.running.partition) < _MemoryManager.getBase(_ProcessManager.running.partition) + _MemoryManager.getLimit(_ProcessManager.running.partition) && loc + _MemoryManager.getBase(_ProcessManager.running.partition) >= _MemoryManager.getBase(_ProcessManager.running.partition)) {
                 return true;
             }
             else {

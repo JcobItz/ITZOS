@@ -9,26 +9,34 @@ module TSOS {
         public Yreg;
         public Zflag;
         public partition;
-        public begin;
-        public end;
+        public base;
+        public limit;
 
         public constructor(processID) {
             //makes a new PCB with specified pid
             this.pid = processID;
 
         }
-        public init(part, start, end) {
+        public init(part, end) {
             //initializes the rest of the PCB data
             this.State = "Ready";
-            this.PC = start;
+            this.PC = 0;
             this.IR = "00";
             this.Acc = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
-            this.partition = _MemoryManager.partitions[part];
-            this.begin = start;
-            this.end = start + end;
+            this.partition = part;
+            this.base = _MemoryManager.partitions[part].base;
+            this.limit = this.base + end;
+        }
+        public isLast() {
+            Control.hostLog("PC: " + this.PC + " END:" + this.limit, "PCB");
+            if (this.PC >= this.limit) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
 

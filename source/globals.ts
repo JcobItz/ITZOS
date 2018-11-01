@@ -19,17 +19,16 @@ const CPU_CLOCK_INTERVAL: number = 100;   // This is in ms (milliseconds) so 100
 const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
+const CONTEXT_SWITCH: number = 2;
+const PC_OUT_OF_BOUNDS: number = 3;
+const EXIT_PROCESS: number = 4;
 
 
-//
-// Global Variables
-// TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
-//
-var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
-
-var _OSclock: number = 0;  // Page 23.
-
+var RUNALL: boolean = false;
+var _RunningPartition: number = 0;
 var _Mode: number = 0;     // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
+var _CPU: TSOS.Cpu;
+var _OSclock = 0;
 var _Mem: TSOS.Memory;
 var _MemoryManager;
 var _MemoryAccessor;
@@ -39,6 +38,8 @@ var _DefaultFontFamily: string = "sans";        // Ignored, I think. The was jus
 var _DefaultFontSize: number = 13;
 var _FontHeightMargin: number = 4;              // Additional space added to font size when advancing a line.
 var _ProcessManager: TSOS.processManager;
+var _PID = 0;
+var _CPUScheduler: TSOS.CPUscheduler;
 var _Trace: boolean = true;  // Default the OS trace to be on.
 
 // The OS Kernel and its queues.

@@ -79,6 +79,9 @@ var TSOS;
             //clearMem
             sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", " - clears the entire memory array");
             this.commandList[this.commandList.length] = sc;
+            //runAll
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", " - runs all programs in the ready Queue");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -429,7 +432,7 @@ var TSOS;
             }
             _StdOut.putText("Input Validated."); // if all the codes are valid, tell the user
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _MemoryManager.loadIn(hex); //then load them into memory 
+            _ProcessManager.createProcess(hex); //then load them into memory 
         };
         Shell.prototype.shellSpellCheck = function () {
             //checks the spelling of commands
@@ -448,15 +451,20 @@ var TSOS;
         };
         Shell.prototype.shellRun = function (PID) {
             //runs the program with the specified pid
-            var p = _ProcessManager.resident[PID]; //p is the process with the provided pid
-            _ProcessManager.running = p; //tell the process manager it is running
-            _CPU.PC = p.PC; //set the CPU program counter to the location of the process in memory
-            _ProcessManager.resident[PID].State = "Running";
+            for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
+                var p = _ProcessManager.residentQueue.dequeue();
+                if (p.pid == PID) {
+                    _ProcessManager.readyQueue.enqueue(p);
+                }
+                else {
+                    _ProcessManager.residentQueue.enqueue(p);
+                }
+            }
+            _ProcessManager.run();
             TSOS.Control.updatePCBDisp();
-            _CPU.isExecuting = true;
         };
         Shell.prototype.shellClearMem = function () {
-            _MemoryAccessor.overWriteAll();
+            _MemoryManager.clearMem();
             TSOS.Control.hostMemory();
         };
         Shell.prototype.shellRunAll = function () {

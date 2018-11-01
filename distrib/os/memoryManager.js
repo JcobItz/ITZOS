@@ -6,7 +6,7 @@ var TSOS;
             if (partitions === void 0) { partitions = []; }
             this.lim = lim;
             this.partitions = partitions;
-            this.lim = 256;
+            this.lim = 255;
             ///Memory separated into 3 partitions of 256 bytes each
             this.partitions = [
                 { "base": 0, "limit": this.lim, "isEmpty": true },
@@ -15,10 +15,8 @@ var TSOS;
             ];
         }
         //loads program into memory
-        memoryManager.prototype.loadIn = function (codes) {
-            var part = this.nextAvailable(); //this is the next available memory location
+        memoryManager.prototype.loadIn = function (codes, part) {
             var next = this.partitions[part].base;
-            var start = next; //save the starting location of the first op code
             for (var i = 0; i < codes.length; i++) {
                 var op_code = codes[i];
                 _Mem.memoryArr[next] = op_code; //insert the code into the memory array
@@ -31,11 +29,6 @@ var TSOS;
             }
             this.partitions[part].isEmpty = false; //set the empty indicator accordingly
             TSOS.Control.hostMemory(); //update memory 
-            var p = new TSOS.PCB(_ProcessManager.resident.length); // create new pcb object
-            //TODO: update PCB display
-            p.init(part, start, codes.size); //initialize the pcb
-            _ProcessManager.load(p); //load it into the process manager
-            _StdOut.putText("Program loaded with pid " + p.pid); //return the pid to the user so they can run it
             return;
         };
         //check if there is enough space for the given op codes where size = the number of op codes
@@ -53,6 +46,12 @@ var TSOS;
                 if (this.partitions[i].isEmpty) {
                     return i;
                 }
+            }
+            return -1;
+        };
+        memoryManager.prototype.clearMem = function () {
+            for (var i = 0; i < _Mem.memoryArr.length; i++) {
+                _Mem.memoryArr[i] = "00";
             }
         };
         //returns the limit of the specified partition(p)

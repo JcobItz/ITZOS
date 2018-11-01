@@ -128,7 +128,10 @@ module TSOS {
             sc = new ShellCommand(this.shellClearMem, "clearmem", " - clears the entire memory array");
 
             this.commandList[this.commandList.length] = sc;
+            //runAll
+            sc = new ShellCommand(this.shellRunAll, "runall", " - runs all programs in the ready Queue");
 
+            this.commandList[this.commandList.length] = sc;
             
 
             
@@ -511,7 +514,7 @@ module TSOS {
             _StdOut.putText("Input Validated.");// if all the codes are valid, tell the user
   
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _MemoryManager.loadIn(hex);//then load them into memory 
+            _ProcessManager.createProcess(hex);//then load them into memory 
            
             
         }
@@ -532,23 +535,32 @@ module TSOS {
         }
         public shellRun(PID) {
             //runs the program with the specified pid
-            var p = <TSOS.PCB>_ProcessManager.resident[PID];//p is the process with the provided pid
-            _ProcessManager.running = p; //tell the process manager it is running
-            _CPU.PC = p.PC;//set the CPU program counter to the location of the process in memory
-            _ProcessManager.resident[PID].State = "Running";
+            for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
+                var p:TSOS.PCB = _ProcessManager.residentQueue.dequeue();
+                if (p.pid == PID) {
+                    _ProcessManager.readyQueue.enqueue(p);
+                } else {
+                    _ProcessManager.residentQueue.enqueue(p);
+                }
 
+            }
+            _ProcessManager.run();
             Control.updatePCBDisp();
-            _CPU.isExecuting = true;
+           
+            
             
             
         }
         public shellClearMem() {
-            _MemoryAccessor.overWriteAll();
+            _MemoryManager.clearMem();
             Control.hostMemory();
 
         }
         public shellRunAll() {
-
+            
+           
+            
+            
         }
         public shellPs() {
 
