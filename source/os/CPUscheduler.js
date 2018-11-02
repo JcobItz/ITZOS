@@ -39,6 +39,7 @@ var TSOS;
         };
         CPUscheduler.prototype.switchContext = function () {
             _CPU.isExecuting = false;
+            _CPU.init();
             _Kernel.krnTrace("Switching COntext");
             _CPU.PC = _ProcessManager.running.PC;
             _CPU.IR = _ProcessManager.running.IR;
@@ -46,7 +47,6 @@ var TSOS;
             _CPU.Xreg = _ProcessManager.running.Xreg;
             _CPU.Yreg = _ProcessManager.running.Yreg;
             _CPU.Zflag = _ProcessManager.running.Zflag;
-            _CPU.isExecuting = true;
         };
         return CPUscheduler;
     }());

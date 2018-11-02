@@ -1,7 +1,7 @@
 module TSOS {
     export class Memory {
        
-        constructor(public memoryArr = void 0) {
+        constructor(public memoryArr = []) {
             
         }
         public init() {

@@ -122,39 +122,42 @@ module TSOS {
             for (var x = 1; x < table.rows.length; x++) {
                 table.deleteRow(x);
             }
-            //then add all of the processes in the resident to the table
-            var p = new Array<TSOS.PCB>();
-            //put the resident queue into an array 
+         
+            var ps = new Array<TSOS.PCB>();
+            
             for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
-                p.push(_ProcessManager.residentQueue.dequeue());
-            }
-            //then loop throught the array to update add each pcb to the table
-            for (var i = 0; i < p.length; i++) {
-                if (!_ProcessManager.residentQueue[i] == void 0) {
 
-
-                    var row = table.insertRow(i + 1);
-                    var PID = row.insertCell(0);
-                    PID.innerHTML = "" + _ProcessManager.residentQueue[i].pid;
-                    var PC = row.insertCell(1);
-                    PC.innerHTML = "" + _ProcessManager.residentQueue[i].PC;
-                    var IR = row.insertCell(2);
-                    IR.innerHTML = "" + _ProcessManager.residentQueue[i].IR;
-                    var Acc = row.insertCell(3);
-                    Acc.innerHTML = "" + _ProcessManager.residentQueue[i].Acc;
-                    var Xreg = row.insertCell(4);
-                    Xreg.innerHTML = "" + _ProcessManager.residentQueue[i].Xreg;
-                    var Yreg = row.insertCell(5);
-                    Yreg.innerHTML = "" + _ProcessManager.residentQueue[i].Yreg;
-                    var Zflag = row.insertCell(6);
-                    Zflag.innerHTML = "" + _ProcessManager.residentQueue[i].Zflag;
-                    var State = row.insertCell(7);
-                    State.innerHTML = "" + _ProcessManager.residentQueue[i].State;
+                ps[i] = _ProcessManager.residentQueue.dequeue();
+                if (ps[i].isLast()) {
+                    ps[i].State = "Completed";
                 }
+
+                var row = table.insertRow(i + 1);
+                var PID = row.insertCell(0);
+                PID.innerHTML = "" + ps[i].pid;
+                var PC = row.insertCell(1);
+                PC.innerHTML = "" + ps[i].PC;
+                var IR = row.insertCell(2);
+                IR.innerHTML = "" + ps[i].IR;
+                var Acc = row.insertCell(3);
+                Acc.innerHTML = "" + ps[i].Acc;
+                var Xreg = row.insertCell(4);
+                Xreg.innerHTML = "" + ps[i].Xreg;
+                var Yreg = row.insertCell(5);
+                Yreg.innerHTML = "" + ps[i].Yreg;
+                var Zflag = row.insertCell(6);
+                Zflag.innerHTML = "" + ps[i].Zflag;
+                var State = row.insertCell(7);
+                State.innerHTML = "" + ps[i].State;
+                var part = row.insertCell(8);
+                part.innerHTML = "" + ps[i].partition;
+                
+                
             }
-            for (var i = 0; i < p.length; i++) {
-                _ProcessManager.residentQueue.enqueue(p[i]);
+            for (var i = 0; i < ps.length; i++) {
+                _ProcessManager.residentQueue.enqueue(ps[i]);
             }
+            
         }
         public static updateCPUDisp() {
             //updates the CPU display with the current data

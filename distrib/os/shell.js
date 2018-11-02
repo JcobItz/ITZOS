@@ -82,6 +82,9 @@ var TSOS;
             //runAll
             sc = new TSOS.ShellCommand(this.shellRunAll, "runall", " - runs all programs in the ready Queue");
             this.commandList[this.commandList.length] = sc;
+            //clearpartition
+            sc = new TSOS.ShellCommand(this.shellClearPartition, "clearpartition", " <int> - clears the specified partition.");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -272,6 +275,8 @@ var TSOS;
                         _StdOut.putText("Syntax: run <pid> - runs the process with the specified pid.");
                     case "clearmem":
                         _StdOut.putText("Clears all memory locations.");
+                    case "clearpartition":
+                        _StdOut.putText("Syntax: clearpartition <int: 0-2>. Clears the Specified memory partition.");
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -456,16 +461,17 @@ var TSOS;
                 if (p.pid == PID) {
                     _ProcessManager.readyQueue.enqueue(p);
                 }
-                else {
-                    _ProcessManager.residentQueue.enqueue(p);
-                }
+                _ProcessManager.residentQueue.enqueue(p);
             }
             _ProcessManager.run();
             TSOS.Control.updatePCBDisp();
         };
         Shell.prototype.shellClearMem = function () {
-            _MemoryManager.clearMem();
+            _MemoryAccessor.overWriteAll();
             TSOS.Control.hostMemory();
+        };
+        Shell.prototype.shellClearPartition = function (p) {
+            _MemoryManager.clearMem(p);
         };
         Shell.prototype.shellRunAll = function () {
         };

@@ -6,7 +6,7 @@ var TSOS;
             if (partitions === void 0) { partitions = []; }
             this.lim = lim;
             this.partitions = partitions;
-            this.lim = 255;
+            this.lim = 256;
             ///Memory separated into 3 partitions of 256 bytes each
             this.partitions = [
                 { "base": 0, "limit": this.lim, "isEmpty": true },
@@ -29,6 +29,7 @@ var TSOS;
             }
             this.partitions[part].isEmpty = false; //set the empty indicator accordingly
             TSOS.Control.hostMemory(); //update memory 
+            TSOS.Control.updatePCBDisp();
             return;
         };
         //check if there is enough space for the given op codes where size = the number of op codes
@@ -49,10 +50,12 @@ var TSOS;
             }
             return -1;
         };
-        memoryManager.prototype.clearMem = function () {
-            for (var i = 0; i < _Mem.memoryArr.length; i++) {
+        memoryManager.prototype.clearMem = function (p) {
+            for (var i = this.partitions[p].base; i < this.partitions[p].base + this.partitions[p].limit; i++) {
                 _Mem.memoryArr[i] = "00";
             }
+            this.partitions[p].isEmpty = true;
+            TSOS.Control.hostMemory();
         };
         //returns the limit of the specified partition(p)
         memoryManager.prototype.getLimit = function (p) {

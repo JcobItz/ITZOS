@@ -49,15 +49,15 @@ module TSOS {
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
             this.IR = _MemoryAccessor.readMemory(this.PC);
-            Control.hostLog(_MemoryManager.partitions[_ProcessManager.running.partition].base + this.PC);
+            
             Control.updateCPUDisp();
-            Control.updatePCBDisp();
+            
             this.isExecuting = true;
             if (!_MemoryAccessor.isValid(this.PC)) {
                 _KernelInterruptQueue.enqueue(PC_OUT_OF_BOUNDS, 0);
                
             } else {
-                var code = _MemoryAccessor.readMemory(this.PC)
+                var code = _MemoryAccessor.readMemory(this.PC);
                 _Kernel.krnTrace("Executing op code " + code + "at " + this.PC);
                 
                 switch (code) {
@@ -218,7 +218,7 @@ module TSOS {
                 }
                 //update CPU and Memory displays
                
-                
+                _ProcessManager.updatePCB();
                 Control.updateCPUDisp();
                 Control.hostMemory();
                 

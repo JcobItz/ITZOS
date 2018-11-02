@@ -132,7 +132,10 @@ module TSOS {
             sc = new ShellCommand(this.shellRunAll, "runall", " - runs all programs in the ready Queue");
 
             this.commandList[this.commandList.length] = sc;
-            
+            //clearpartition
+            sc = new ShellCommand(this.shellClearPartition, "clearpartition", " <int> - clears the specified partition.");
+
+            this.commandList[this.commandList.length] = sc;
 
             
             this.TaskTime();
@@ -341,6 +344,8 @@ module TSOS {
                         _StdOut.putText("Syntax: run <pid> - runs the process with the specified pid.");
                     case "clearmem":
                         _StdOut.putText("Clears all memory locations.");
+                    case "clearpartition":
+                        _StdOut.putText("Syntax: clearpartition <int: 0-2>. Clears the Specified memory partition.");
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -539,9 +544,9 @@ module TSOS {
                 var p:TSOS.PCB = _ProcessManager.residentQueue.dequeue();
                 if (p.pid == PID) {
                     _ProcessManager.readyQueue.enqueue(p);
-                } else {
-                    _ProcessManager.residentQueue.enqueue(p);
-                }
+                } 
+                _ProcessManager.residentQueue.enqueue(p);
+                
 
             }
             _ProcessManager.run();
@@ -552,10 +557,15 @@ module TSOS {
             
         }
         public shellClearMem() {
-            _MemoryManager.clearMem();
+            _MemoryAccessor.overWriteAll();
             Control.hostMemory();
 
         }
+        public shellClearPartition(p: number) {
+            _MemoryManager.clearMem(p);
+           
+        }
+        
         public shellRunAll() {
             
            

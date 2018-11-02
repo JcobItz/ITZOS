@@ -2,7 +2,7 @@ var TSOS;
 (function (TSOS) {
     var Memory = /** @class */ (function () {
         function Memory(memoryArr) {
-            if (memoryArr === void 0) { memoryArr = void 0; }
+            if (memoryArr === void 0) { memoryArr = []; }
             this.memoryArr = memoryArr;
         }
         Memory.prototype.init = function () {

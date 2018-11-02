@@ -16,7 +16,7 @@ var TSOS;
             this.Zflag = 0;
             this.partition = part;
             this.base = _MemoryManager.partitions[part].base;
-            this.limit = this.base + end;
+            this.limit = end;
         };
         PCB.prototype.isLast = function () {
             TSOS.Control.hostLog("PC: " + this.PC + " END:" + this.limit, "PCB");
