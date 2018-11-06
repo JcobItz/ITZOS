@@ -90,6 +90,15 @@ var TSOS;
                 _CPU.isExecuting = true;
             }
         };
+        processManager.prototype.listPs = function () {
+            var ps = [];
+            for (var i = 0; i < this.readyQueue.getSize(); i++) {
+                var p = this.readyQueue.dequeue();
+                ps[i] = p.pid;
+                this.readyQueue.enqueue(p);
+            }
+            return ps;
+        };
         processManager.prototype.isEmpty = function () {
             return this.residentQueue.isEmpty();
         };

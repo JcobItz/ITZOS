@@ -136,7 +136,18 @@ module TSOS {
             sc = new ShellCommand(this.shellClearPartition, "clearpartition", " <int> - clears the specified partition.");
 
             this.commandList[this.commandList.length] = sc;
+            //kill
+            sc = new ShellCommand(this.shellKill, "kill", " <int> - Kills the Process with the specified PID");
 
+            this.commandList[this.commandList.length] = sc;
+            //Ps
+            sc = new ShellCommand(this.shellPs, "ps", " - lists the PIDs of all processes in the readyQueue.");
+
+            this.commandList[this.commandList.length] = sc;
+            //quantumn <int>
+            sc = new ShellCommand(this.shellQuantum, "quantum", " <int> - Sets the quantum of the CPUScheduler to the specified integer.");
+
+            this.commandList[this.commandList.length] = sc;
             
             this.TaskTime();
 
@@ -540,17 +551,25 @@ module TSOS {
         }
         public shellRun(PID) {
             //runs the program with the specified pid
+            var found: boolean = false;
             for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
                 var p:TSOS.PCB = _ProcessManager.residentQueue.dequeue();
                 if (p.pid == PID) {
+                    found = true;
                     _ProcessManager.readyQueue.enqueue(p);
-                } 
-                _ProcessManager.residentQueue.enqueue(p);
+                } else {
+                    _ProcessManager.residentQueue.enqueue(p);
+                }
+               
                 
-
             }
-            _ProcessManager.run();
-            Control.updatePCBDisp();
+            if (found) {
+                _ProcessManager.run();
+                Control.updatePCBDisp();
+            } else {
+                _StdOut.putText("The PID entered does not exist.  Please enter a valid PID.");
+            }
+            
            
             
             
@@ -567,19 +586,23 @@ module TSOS {
         }
         
         public shellRunAll() {
-            
-           
-            
-            
+            _ProcessManager.runAll();
+            RUNALL = true;
         }
         public shellPs() {
-
+            var pList = _ProcessManager.listPs();
+            var output = "";
+            for (var i = 0; i < pList.length; i++) {
+                output += " " + pList[i] + ",";
+            }
+            
+            _StdOut.putText(output);
         }
         public shellKill(pid) {
-
+            _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
         }
-        public shellQuantum(q) {
-
+        public shellQuantum(q: number) {
+            _CPUScheduler.quantum = q;
         }
            
 

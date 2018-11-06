@@ -21,7 +21,7 @@ module TSOS {
         }
       
         public switchContext() {
-            if (_ProcessManager.running != void 0 && RUNALL != true) {
+            if (_ProcessManager.running != void 0) {
                 _CPU.isExecuting = false;
                 _Kernel.krnTrace("Saving Context");
                 _ProcessManager.running.PC = _CPU.PC;
@@ -30,9 +30,11 @@ module TSOS {
                 _ProcessManager.running.Xreg = _CPU.Xreg;
                 _ProcessManager.running.Yreg = _CPU.Yreg;
                 _ProcessManager.running.Zflag = _CPU.Zflag;
-                
-               
+                _ProcessManager.readyQueue.enqueue(_ProcessManager.running);
+                _ProcessManager.running = void 0;
             }
+            
+            
             
             _ProcessManager.running = _ProcessManager.readyQueue.dequeue();
             _Kernel.krnTrace("Switching Context");
@@ -42,7 +44,9 @@ module TSOS {
             _CPU.Xreg = _ProcessManager.running.Xreg;
             _CPU.Yreg = _ProcessManager.running.Yreg;
             _CPU.Zflag = _ProcessManager.running.Zflag;
+            _CPUScheduler.watch();
             _CPU.isExecuting = true;
+            
             
             
         }

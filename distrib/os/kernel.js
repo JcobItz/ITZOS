@@ -124,7 +124,7 @@ var TSOS;
                     _ProcessManager.running = void 0;
                     TSOS.Control.updateCPUDisp();
                     TSOS.Control.updatePCBDisp();
-                    if (params) {
+                    if (params && _ProcessManager.readyQueue.getSize() > 0) {
                         _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH, 0));
                     }
                     TSOS.Control.updateCPUDisp();

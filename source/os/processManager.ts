@@ -107,6 +107,15 @@ module TSOS {
                 
             }
         }
+        public listPs(): number[] {
+            var ps = [];
+            for (var i = 0; i < this.readyQueue.getSize(); i++) {
+                var p: PCB = this.readyQueue.dequeue();
+                ps[i] = p.pid;
+                this.readyQueue.enqueue(p);
+            }
+            return ps;
+        }
         public isEmpty() {
             
             return this.residentQueue.isEmpty();

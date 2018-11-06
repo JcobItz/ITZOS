@@ -85,6 +85,15 @@ var TSOS;
             //clearpartition
             sc = new TSOS.ShellCommand(this.shellClearPartition, "clearpartition", " <int> - clears the specified partition.");
             this.commandList[this.commandList.length] = sc;
+            //kill
+            sc = new TSOS.ShellCommand(this.shellKill, "kill", " <int> - Kills the Process with the specified PID");
+            this.commandList[this.commandList.length] = sc;
+            //Ps
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", " - lists the PIDs of all processes in the readyQueue.");
+            this.commandList[this.commandList.length] = sc;
+            //quantumn <int>
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", " <int> - Sets the quantum of the CPUScheduler to the specified integer.");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -487,10 +496,18 @@ var TSOS;
             RUNALL = true;
         };
         Shell.prototype.shellPs = function () {
+            var pList = _ProcessManager.listPs();
+            var output = "";
+            for (var i = 0; i < pList.length; i++) {
+                output += " " + pList[i] + ",";
+            }
+            _StdOut.putText(output);
         };
         Shell.prototype.shellKill = function (pid) {
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(EXIT_PROCESS, RUNALL));
         };
         Shell.prototype.shellQuantum = function (q) {
+            _CPUScheduler.quantum = q;
         };
         return Shell;
     }());

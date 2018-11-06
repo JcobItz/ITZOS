@@ -139,7 +139,7 @@ module TSOS {
                     _ProcessManager.running = void 0;
                     Control.updateCPUDisp();
                     Control.updatePCBDisp();
-                    if (params) {
+                    if (params && _ProcessManager.readyQueue.getSize() > 0) {
                         _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0))
                     }
                     Control.updateCPUDisp();
