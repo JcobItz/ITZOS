@@ -54,7 +54,7 @@ module TSOS {
             
             this.isExecuting = true;
             if (!_MemoryAccessor.isValid(this.PC)) {
-                _KernelInterruptQueue.enqueue(PC_OUT_OF_BOUNDS, 0);
+                _KernelInterruptQueue.enqueue(new Interrupt(PC_OUT_OF_BOUNDS, 0));
                
             } else {
                 var code = _MemoryAccessor.readMemory(this.PC);
@@ -149,9 +149,22 @@ module TSOS {
                         //set isExecuting to false
                         this.isExecuting = false;
                         //change process state to complete
-                        //_ProcessManager.updatePCB(_ProcessManager.running);
+                        _ProcessManager.updatePCB();
                         //remove the process
-                        _ProcessManager.running = void 0;
+                        
+                        if (RUNALL) {
+                            if (_ProcessManager.readyQueue.getSize() > 0) {
+                                _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
+                               
+                            } else {
+                                _Kernel.krnTrace("Finished Running all processes");
+                                _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
+                            }
+                            
+                        } else {
+                            _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
+                        }
+                        Control.hostMemory();
                         Control.updatePCBDisp();
                         
                         break;
@@ -217,11 +230,14 @@ module TSOS {
                     
                 }
                 //update CPU and Memory displays
+                try {
+                    _ProcessManager.updatePCB();
+                } catch (e) {
+                    console.log('Error' + e);
+                }
                
-                _ProcessManager.updatePCB();
                 Control.updateCPUDisp();
                 Control.hostMemory();
-                
                 Control.updatePCBDisp();
                 
                 

@@ -17,7 +17,7 @@ module TSOS {
 
                 }
 
-                _Mem.memoryArr[_MemoryManager.partitions[_RunningPartition].base + loc] = val;
+                _Mem.memoryArr[_MemoryManager.partitions[_ProcessManager.running.partition].base + loc] = val;
                 return;
 
             } else {

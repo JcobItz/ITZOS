@@ -49,7 +49,7 @@ var TSOS;
             TSOS.Control.updateCPUDisp();
             this.isExecuting = true;
             if (!_MemoryAccessor.isValid(this.PC)) {
-                _KernelInterruptQueue.enqueue(PC_OUT_OF_BOUNDS, 0);
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(PC_OUT_OF_BOUNDS, 0));
             }
             else {
                 var code = _MemoryAccessor.readMemory(this.PC);
@@ -138,9 +138,21 @@ var TSOS;
                         //set isExecuting to false
                         this.isExecuting = false;
                         //change process state to complete
-                        //_ProcessManager.updatePCB(_ProcessManager.running);
+                        _ProcessManager.updatePCB();
                         //remove the process
-                        _ProcessManager.running = void 0;
+                        if (RUNALL) {
+                            if (_ProcessManager.readyQueue.getSize() > 0) {
+                                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(EXIT_PROCESS, RUNALL));
+                            }
+                            else {
+                                _Kernel.krnTrace("Finished Running all processes");
+                                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(EXIT_PROCESS, RUNALL));
+                            }
+                        }
+                        else {
+                            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(EXIT_PROCESS, RUNALL));
+                        }
+                        TSOS.Control.hostMemory();
                         TSOS.Control.updatePCBDisp();
                         break;
                     case "EC":
@@ -201,7 +213,12 @@ var TSOS;
                         break;
                 }
                 //update CPU and Memory displays
-                _ProcessManager.updatePCB();
+                try {
+                    _ProcessManager.updatePCB();
+                }
+                catch (e) {
+                    console.log('Error' + e);
+                }
                 TSOS.Control.updateCPUDisp();
                 TSOS.Control.hostMemory();
                 TSOS.Control.updatePCBDisp();

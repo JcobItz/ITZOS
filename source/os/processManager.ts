@@ -27,24 +27,37 @@ module TSOS {
                 Control.hostLog("Loaded process with PID " + _PID);
                 _PID++;
                 this.residentQueue.enqueue(p);
-
+                
                 _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable());
-                Control.updatePCBDisp();
+                
             } else {
                 _StdOut.putText("There are no available memory partitions, please use the cleamMem command to clear all partitions, or clearPartition to clear one.");
             }
            
         }
-        public remove(p: TSOS.PCB) {
+        public remove(pid) {
             //removes a PCB from the array of PCBS and updates the PCB display
            
-            
-            for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
-                var pro: TSOS.PCB = _ProcessManager.residentQueue.dequeue();
-                if (pro.pid != p.pid) {
-                    _ProcessManager.residentQueue.enqueue(pro);
+            if (this.running != void 0) {
+                if (this.running.pid == pid) {
+                    this.running = void 0;
+                    _Kernel.krnTrace("removed pid " + pid + "(running process)");
                 }
             }
+
+            for (var i = 0; i < this.readyQueue.getSize(); i++) {
+                var pro: TSOS.PCB = this.readyQueue.dequeue();
+                if (pro.pid == pid) {
+                    _Kernel.krnTrace("removed pid " + pid);
+                    return
+                } else {
+                    this.readyQueue.enqueue(pro);
+                    
+                }
+
+            }
+            
+
            
 
 
@@ -63,6 +76,17 @@ module TSOS {
             this.running.Yreg = _CPU.Yreg;
             this.running.Zflag = _CPU.Zflag;
 
+            
+        }
+        public runAll() {
+            _Kernel.krnTrace("Running all loaded processes");
+            RUNALL = true;
+            while (!this.residentQueue.isEmpty()) {
+                
+                this.readyQueue.enqueue(this.residentQueue.dequeue());
+            }
+           
+            _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0));
             
         }
         public run() {

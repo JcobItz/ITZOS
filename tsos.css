@@ -93,19 +93,19 @@ td{
     display: inline-block;
     width: 100%;
 }
-#divProcesses {
+#divProcesses, #divReady {
     width: 350px;
     height: auto;
     background-color: #96b9f2;
     margin-bottom: 10px;
     border-radius: 5px;
 }
-#processes{
+#processes, #readyprocesses{
     width: 100%;
     height: auto;
 
 }
-#processes th{
+#processes th, #readyprocesses th{
     width: 11%;
     margin: 0 auto;
 }

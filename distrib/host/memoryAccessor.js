@@ -15,7 +15,7 @@ var TSOS;
                 if (parseInt(val, 16) < 16) {
                     val = "0" + val;
                 }
-                _Mem.memoryArr[_MemoryManager.partitions[_RunningPartition].base + loc] = val;
+                _Mem.memoryArr[_MemoryManager.partitions[_ProcessManager.running.partition].base + loc] = val;
                 return;
             }
             else {

@@ -456,15 +456,24 @@ var TSOS;
         };
         Shell.prototype.shellRun = function (PID) {
             //runs the program with the specified pid
+            var found = false;
             for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
                 var p = _ProcessManager.residentQueue.dequeue();
                 if (p.pid == PID) {
+                    found = true;
                     _ProcessManager.readyQueue.enqueue(p);
                 }
-                _ProcessManager.residentQueue.enqueue(p);
+                else {
+                    _ProcessManager.residentQueue.enqueue(p);
+                }
             }
-            _ProcessManager.run();
-            TSOS.Control.updatePCBDisp();
+            if (found) {
+                _ProcessManager.run();
+                TSOS.Control.updatePCBDisp();
+            }
+            else {
+                _StdOut.putText("The PID entered does not exist.  Please enter a valid PID.");
+            }
         };
         Shell.prototype.shellClearMem = function () {
             _MemoryAccessor.overWriteAll();
@@ -474,6 +483,8 @@ var TSOS;
             _MemoryManager.clearMem(p);
         };
         Shell.prototype.shellRunAll = function () {
+            _ProcessManager.runAll();
+            RUNALL = true;
         };
         Shell.prototype.shellPs = function () {
         };

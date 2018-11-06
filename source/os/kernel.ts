@@ -87,10 +87,14 @@ module TSOS {
                 var interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
+
                 _CPU.cycle();
+                _CPUScheduler.watch();
+                Control.hostMemory();
             } else {                      // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
             }
+            Control.hostMemory();
         }
 
 
@@ -126,12 +130,24 @@ module TSOS {
                     _krnKeyboardDriver.isr(params);   // Kernel mode device driver
                     _StdIn.handleInput();
                     break;
-            
-                    
                 case CONTEXT_SWITCH:
-                    _CPUScheduler.saveContext();
                     _CPUScheduler.switchContext();
-
+                    break;
+                case EXIT_PROCESS:
+                    _CPUScheduler.unwatch();
+                    _ProcessManager.remove(_ProcessManager.running.pid);
+                    _ProcessManager.running = void 0;
+                    Control.updateCPUDisp();
+                    Control.updatePCBDisp();
+                    if (params) {
+                        _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0))
+                    }
+                    Control.updateCPUDisp();
+                    Control.updatePCBDisp();
+                    break;
+                case PC_OUT_OF_BOUNDS:
+                    _StdOut.putText("PC is out of bounds");
+                    break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }

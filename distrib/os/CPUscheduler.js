@@ -14,39 +14,36 @@ var TSOS;
         CPUscheduler.prototype.watch = function () {
             if (_ProcessManager.readyQueue.getSize() > 0) {
                 this.timer++;
+                _Kernel.krnTrace("" + this.timer);
                 if (this.timer == this.quantum) {
-                    _KernelInputQueue.enqueue(CONTEXT_SWITCH, 0);
+                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH, 0));
                     this.timer = 0;
                 }
             }
         };
-        CPUscheduler.prototype.saveContext = function () {
-            _CPU.isExecuting = false;
-            _Kernel.krnTrace("Saving COntext");
-            _ProcessManager.running.PC = _CPU.PC;
-            _ProcessManager.running.IR = _CPU.IR;
-            _ProcessManager.running.Acc = _CPU.Acc;
-            _ProcessManager.running.Xreg = _CPU.Xreg;
-            _ProcessManager.running.Yreg = _CPU.Yreg;
-            _ProcessManager.running.Zflag = _CPU.Zflag;
-            if (_ProcessManager.running.isLast()) {
-                _ProcessManager.remove(_ProcessManager.running);
-            }
-            else {
-                _ProcessManager.readyQueue.enqueue(_ProcessManager.running);
-            }
-            _ProcessManager.running = void 0;
+        CPUscheduler.prototype.unwatch = function () {
+            this.timer = 0;
         };
         CPUscheduler.prototype.switchContext = function () {
-            _CPU.isExecuting = false;
-            _CPU.init();
-            _Kernel.krnTrace("Switching COntext");
+            if (_ProcessManager.running != void 0 && RUNALL != true) {
+                _CPU.isExecuting = false;
+                _Kernel.krnTrace("Saving Context");
+                _ProcessManager.running.PC = _CPU.PC;
+                _ProcessManager.running.IR = _CPU.IR;
+                _ProcessManager.running.Acc = _CPU.Acc;
+                _ProcessManager.running.Xreg = _CPU.Xreg;
+                _ProcessManager.running.Yreg = _CPU.Yreg;
+                _ProcessManager.running.Zflag = _CPU.Zflag;
+            }
+            _ProcessManager.running = _ProcessManager.readyQueue.dequeue();
+            _Kernel.krnTrace("Switching Context");
             _CPU.PC = _ProcessManager.running.PC;
             _CPU.IR = _ProcessManager.running.IR;
             _CPU.Acc = _ProcessManager.running.Acc;
             _CPU.Xreg = _ProcessManager.running.Xreg;
             _CPU.Yreg = _ProcessManager.running.Yreg;
             _CPU.Zflag = _ProcessManager.running.Zflag;
+            _CPU.isExecuting = true;
         };
         return CPUscheduler;
     }());

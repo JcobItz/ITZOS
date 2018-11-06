@@ -122,40 +122,72 @@ module TSOS {
             for (var x = 1; x < table.rows.length; x++) {
                 table.deleteRow(x);
             }
-         
-            var ps = new Array<TSOS.PCB>();
             
             for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
 
-                ps[i] = _ProcessManager.residentQueue.dequeue();
-                if (ps[i].isLast()) {
-                    ps[i].State = "Completed";
+                var p:PCB = _ProcessManager.residentQueue.dequeue();
+                if (p.isLast()) {
+                    p.State = "Completed";
                 }
 
                 var row = table.insertRow(i + 1);
                 var PID = row.insertCell(0);
-                PID.innerHTML = "" + ps[i].pid;
+                PID.innerHTML = "" + p.pid;
                 var PC = row.insertCell(1);
-                PC.innerHTML = "" + ps[i].PC;
+                PC.innerHTML = "" + p.PC;
                 var IR = row.insertCell(2);
-                IR.innerHTML = "" + ps[i].IR;
+                IR.innerHTML = "" + p.IR;
                 var Acc = row.insertCell(3);
-                Acc.innerHTML = "" + ps[i].Acc;
+                Acc.innerHTML = "" + p.Acc;
                 var Xreg = row.insertCell(4);
-                Xreg.innerHTML = "" + ps[i].Xreg;
+                Xreg.innerHTML = "" + p.Xreg;
                 var Yreg = row.insertCell(5);
-                Yreg.innerHTML = "" + ps[i].Yreg;
+                Yreg.innerHTML = "" + p.Yreg;
                 var Zflag = row.insertCell(6);
-                Zflag.innerHTML = "" + ps[i].Zflag;
+                Zflag.innerHTML = "" + p.Zflag;
                 var State = row.insertCell(7);
-                State.innerHTML = "" + ps[i].State;
+                State.innerHTML = "" + p.State;
                 var part = row.insertCell(8);
-                part.innerHTML = "" + ps[i].partition;
+                part.innerHTML = "" + p.partition;
                 
-                
+                _ProcessManager.residentQueue.enqueue(p);
             }
-            for (var i = 0; i < ps.length; i++) {
-                _ProcessManager.residentQueue.enqueue(ps[i]);
+            
+            var table2 = <HTMLTableElement>document.getElementById('readyprocesses');
+            for (var x = 1; x < table2.rows.length; x++) {
+                table2.deleteRow(x);
+            }
+
+           
+            var size = _ProcessManager.readyQueue.getSize()
+            for (var i = 0; i < size; i++) {
+
+                var p: PCB = _ProcessManager.readyQueue.dequeue();
+                if (p.isLast()) {
+                    p.State = "Completed";
+                }
+
+                var row = table2.insertRow(i + 1);
+                var PID = row.insertCell(0);
+                PID.innerHTML = "" + p.pid;
+                var PC = row.insertCell(1);
+                PC.innerHTML = "" + p.PC;
+                var IR = row.insertCell(2);
+                IR.innerHTML = "" + p.IR;
+                var Acc = row.insertCell(3);
+                Acc.innerHTML = "" + p.Acc;
+                var Xreg = row.insertCell(4);
+                Xreg.innerHTML = "" + p.Xreg;
+                var Yreg = row.insertCell(5);
+                Yreg.innerHTML = "" + p.Yreg;
+                var Zflag = row.insertCell(6);
+                Zflag.innerHTML = "" + p.Zflag;
+                var State = row.insertCell(7);
+                State.innerHTML = "" + p.State;
+                var part = row.insertCell(8);
+                part.innerHTML = "" + p.partition;
+
+                _ProcessManager.readyQueue.enqueue(p);
             }
             
         }
