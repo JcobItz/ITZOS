@@ -28,13 +28,13 @@ var TSOS;
             if (_ProcessManager.running != void 0) {
                 _CPU.isExecuting = false;
                 _Kernel.krnTrace("Saving Context");
-                _ProcessManager.running.PC = _CPU.PC;
-                _ProcessManager.running.IR = _CPU.IR;
-                _ProcessManager.running.Acc = _CPU.Acc;
-                _ProcessManager.running.Xreg = _CPU.Xreg;
-                _ProcessManager.running.Yreg = _CPU.Yreg;
-                _ProcessManager.running.Zflag = _CPU.Zflag;
-                _ProcessManager.readyQueue.enqueue(_ProcessManager.running);
+                _ProcessManager.updatePCB();
+                if (!_ProcessManager.running.isLast()) {
+                    _ProcessManager.readyQueue.enqueue(_ProcessManager.running);
+                }
+                else {
+                    _ProcessManager.residentQueue.enqueue(_ProcessManager.running);
+                }
                 _ProcessManager.running = void 0;
             }
             _ProcessManager.running = _ProcessManager.readyQueue.dequeue();
@@ -46,7 +46,6 @@ var TSOS;
             _CPU.Yreg = _ProcessManager.running.Yreg;
             _CPU.Zflag = _ProcessManager.running.Zflag;
             _CPUScheduler.watch();
-            _CPU.isExecuting = true;
         };
         return CPUscheduler;
     }());

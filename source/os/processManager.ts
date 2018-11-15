@@ -25,6 +25,7 @@ module TSOS {
                 var p = new PCB(_PID);
                 p.init(part, codes.length);
                 Control.hostLog("Loaded process with PID " + _PID);
+                _Console.putText("Loaded process with PID " + _PID);
                 _PID++;
                 this.residentQueue.enqueue(p);
                 
@@ -118,7 +119,7 @@ module TSOS {
         }
         public isEmpty() {
             
-            return this.residentQueue.isEmpty();
+            return this.readyQueue.isEmpty();
         }
     }
 

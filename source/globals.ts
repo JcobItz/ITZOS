@@ -22,7 +22,7 @@ const KEYBOARD_IRQ: number = 1;
 const CONTEXT_SWITCH: number = 2;
 const PC_OUT_OF_BOUNDS: number = 3;
 const EXIT_PROCESS: number = 4;
-
+const CONSOLE_WRITE: number = 5;
 
 var RUNALL: boolean = false;
 var _RunningPartition: number = 0;

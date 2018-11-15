@@ -511,7 +511,7 @@ module TSOS {
             var hex = [];
             hex = input.value.split(" ");//put the op codes into an array
             
-            var reg = new RegExp(/^[0-9a-fA-F]{2}$/);
+            var reg = new RegExp(/^[0-9a-fA-F0-9]{2}/);
             for (var i = 0; i < hex.length; i++) {
                 if (reg.test(hex[i])) {//if they satisfy the regular expression above continue
                     if (i == (hex.length - 1)) {
@@ -520,7 +520,7 @@ module TSOS {
                     continue;
                 } else { //if they are not validated by the regex then tell the user they are invalid
                     
-                    _StdOut.putText("Invalid Input.");
+                    _StdOut.putText("Invalid Input: " + hex[i]);
                     document.getElementById("taProgramInput").style.border = "2px solid red";//and change the ta border to red for fun
 
                     
@@ -576,7 +576,9 @@ module TSOS {
             
         }
         public shellClearMem() {
-            _MemoryAccessor.overWriteAll();
+            _MemoryManager.clearMem(0);
+            _MemoryManager.clearMem(1);
+            _MemoryManager.clearMem(2);
             Control.hostMemory();
 
         }

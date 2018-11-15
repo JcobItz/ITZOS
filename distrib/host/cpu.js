@@ -136,7 +136,6 @@ var TSOS;
                         //break
                         //system call for exit
                         //set isExecuting to false
-                        this.isExecuting = false;
                         //change process state to complete
                         _ProcessManager.updatePCB();
                         //remove the process
@@ -175,7 +174,7 @@ var TSOS;
                         break;
                     case "D0":
                         //branch n bytes if Xflag = 0
-                        if (this.Zflag = 0) {
+                        if (this.Zflag == 0) {
                             //first make sure the Zflag is zero
                             //then get the number of bytes we have to branch
                             var bytes = parseInt(_MemoryAccessor.readMemory(this.PC + 1), 16);
@@ -205,11 +204,25 @@ var TSOS;
                         break;
                     case "FF":
                         //system call: if Xreg = 1, print integer stored in Yreg
-                        //if Xreg = 2, print the 00-terminated string stored at the adress in the Yreg
+                        //if Xreg = 2, print the 00-terminated string stored at the address in the Yreg
                         if (this.Xreg == 1) {
+                            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONSOLE_WRITE, "Yreg: " + this.Yreg));
                         }
                         else if (this.Xreg == 2) {
+                            var addr = this.Yreg;
+                            var output = "";
+                            // Gets the ASCII from the address, converts it to characters, then passes to console's putText.
+                            while (_MemoryAccessor.readMemory(addr) != "00") {
+                                var ascii = _MemoryAccessor.readMemory(addr);
+                                // Convert hex to decimal
+                                var dec = parseInt(ascii.toString(), 16);
+                                var chr = String.fromCharCode(dec);
+                                output += chr;
+                                addr++;
+                            }
+                            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONSOLE_WRITE, "String: " + output));
                         }
+                        this.PC++;
                         break;
                 }
                 //update CPU and Memory displays

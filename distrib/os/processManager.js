@@ -29,6 +29,7 @@ var TSOS;
                 var p = new TSOS.PCB(_PID);
                 p.init(part, codes.length);
                 TSOS.Control.hostLog("Loaded process with PID " + _PID);
+                _Console.putText("Loaded process with PID " + _PID);
                 _PID++;
                 this.residentQueue.enqueue(p);
                 _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable());
@@ -100,7 +101,7 @@ var TSOS;
             return ps;
         };
         processManager.prototype.isEmpty = function () {
-            return this.residentQueue.isEmpty();
+            return this.readyQueue.isEmpty();
         };
         return processManager;
     }());

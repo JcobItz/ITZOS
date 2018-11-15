@@ -68,7 +68,6 @@ var TSOS;
                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
                This, on the other hand, is the clock pulse from the hardware / VM / host that tells the kernel
                that it has to look for interrupts and process them if it finds any.                           */
-            _OsShell.TaskTime();
             // Check for an interrupt, are any. Page 560
             if (_KernelInterruptQueue.getSize() > 0) {
                 // Process the first interrupt on the interrupt queue.
@@ -79,12 +78,11 @@ var TSOS;
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed. {
                 _CPU.cycle();
                 _CPUScheduler.watch();
-                TSOS.Control.hostMemory();
             }
             else { // If there are no interrupts and there is nothing being executed then just be idle. {
                 this.krnTrace("Idle");
             }
-            TSOS.Control.hostMemory();
+            _OsShell.TaskTime();
         };
         //
         // Interrupt Handling
@@ -117,10 +115,11 @@ var TSOS;
                     break;
                 case CONTEXT_SWITCH:
                     _CPUScheduler.switchContext();
+                    _CPU.isExecuting = true;
                     break;
                 case EXIT_PROCESS:
                     _CPUScheduler.unwatch();
-                    _ProcessManager.remove(_ProcessManager.running.pid);
+                    _CPUScheduler.switchContext();
                     _ProcessManager.running = void 0;
                     TSOS.Control.updateCPUDisp();
                     TSOS.Control.updatePCBDisp();
@@ -132,6 +131,11 @@ var TSOS;
                     break;
                 case PC_OUT_OF_BOUNDS:
                     _StdOut.putText("PC is out of bounds");
+                    break;
+                case CONSOLE_WRITE:
+                    _StdOut.putText(params);
+                    _StdOut.advanceLine();
+                    _OsShell.putPrompt();
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
