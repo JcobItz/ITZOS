@@ -17,6 +17,7 @@
     <script type="text/javascript" src="distrib/host/cpu.js"></script>
     <script type="text/javascript" src="distrib/host/memory.js"></script>
     <script type="text/javascript" src="distrib/host/memoryAccessor.js"></script>
+    <script type="text/javascript" src="distrib/host/disk.js"></script>
 
     <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
     <script type="text/javascript" src="distrib/os/interrupt.js"></script>
@@ -33,6 +34,7 @@
     <script type="text/javascript" src="distrib/os/pcb.js"></script>
     <script type="text/javascript" src="distrib/os/processManager.js"></script>
     <script type="text/javascript" src="distrib/os/CPUscheduler.js"></script>
+    <script type="text/javascript" src="distrib/os/deviceDriverDisk.js"></script>
     <!-- Other Routines -->
     <script type="text/javascript" src="distrib/utils.js"></script>
     <!-- Uncomment the line below to enable GLaDOS testing. -->
@@ -78,6 +80,10 @@
                     width="500px"
                     height="500px"
                     tabindex="3"></canvas>
+        </div>
+        <div id="diskDisplay" style="overflow-x:scroll; overflow-y: scroll; width: 20%; height: 200px;">
+            <label for="diskTable">Disk</label>
+            <table id="diskTable"></table>
         </div>
 
         <div id="divLog" style="margin-left:520px;">

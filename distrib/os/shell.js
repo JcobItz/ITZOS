@@ -94,6 +94,18 @@ var TSOS;
             //quantumn <int>
             sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", " <int> - Sets the quantum of the CPUScheduler to the specified integer.");
             this.commandList[this.commandList.length] = sc;
+            // create <filename> - creates a file
+            sc = new TSOS.ShellCommand(this.shellCreateFile, "create", "<filename> - Creates a file given a filename");
+            this.commandList[this.commandList.length] = sc;
+            // read <filename> - reads a file
+            sc = new TSOS.ShellCommand(this.shellReadFile, "read", "<filename> - Reads a file given a filename");
+            this.commandList[this.commandList.length] = sc;
+            // write <filename> - writes a file
+            sc = new TSOS.ShellCommand(this.shellWriteFile, "write", "<filename> \"text\" - Writes text to a file given a filename");
+            this.commandList[this.commandList.length] = sc;
+            // delete <filename> - deletes a file
+            sc = new TSOS.ShellCommand(this.shellDeleteFile, "delete", "<filename> - Deletes a file given a filename");
+            this.commandList[this.commandList.length] = sc;
             this.TaskTime();
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -510,6 +522,125 @@ var TSOS;
         };
         Shell.prototype.shellQuantum = function (q) {
             _CPUScheduler.quantum = q;
+        };
+        Shell.prototype.shellCreateFile = function (f) {
+            alert(f);
+            if (f.length > 56) {
+                _StdOut.putText("File name length too long! Must be " + 56 + " characters or less.");
+                return;
+            }
+            //var reg = new RegExp(/^[a-z]+$/i);
+            if (f.toString().match('/^[a-z]+$/i')) {
+                _StdOut.putText("Filenames may only be characters.");
+                return;
+            }
+            var status = _krnDiskDriver.createFile(f.toString());
+            if (status == SUCCESS) {
+                _StdOut.putText("File successfully created: " + f);
+                return;
+            }
+            else if (status == FILE_NAME_ALREADY_EXISTS) {
+                _StdOut.putText("File name already exists.");
+                return;
+            }
+            else if (status == DISK_FULL) {
+                _StdOut.putText("File creation failure: No more space on disk.");
+                return;
+            }
+            if (f.length == 0) {
+                _StdOut.putText("Usage: create <filename>  Please supply a filename");
+                return;
+            }
+        };
+        Shell.prototype.shellReadFile = function (f) {
+            console.log("SHell attempting to read file: " + f);
+            _Kernel.krnTrace("Shell: attempting to read file" + f);
+            _Kernel.krnTrace("checking for $");
+            for (var i = 0; i < f.length; i++) {
+                if (f.toString().charAt(i) == "$") {
+                    _StdOut.putText("Oman u do not wanna do dat");
+                    return;
+                }
+            }
+            console.log("finished checking for $");
+            _Kernel.krnTrace("Shell: Finished checking for $");
+            var status = _krnDiskDriver.diskRead(f);
+            console.log("recieved status");
+            if (status == FILE_NAME_DOESNT_EXIST) {
+                _StdOut.putText("The file: " + f + " does not exist.");
+                return;
+            }
+            else {
+                _StdOut.putText(status.toString());
+                return;
+            }
+            // Print out file
+        };
+        Shell.prototype.shellWriteFile = function (args) {
+            if (args.length >= 2) {
+                // make sure user can't write to swap files
+                if (args[0].includes("$")) {
+                    _StdOut.putText("Oman u do not wanna do dat");
+                    return;
+                }
+                // If user entered spaces, combine the args
+                var string = "";
+                for (var i = 1; i < args.length; i++) {
+                    string += args[i] + " ";
+                }
+                // Check to make sure the user has quotes
+                if (string.charAt(0) != "\"" || string.charAt(string.length - 2) != "\"") {
+                    _StdOut.putText("Usage: write <filename> \"<text>\"  Please supply a filename and text surrounded by quotes.");
+                    return;
+                }
+                string = string.trim();
+                // Enforce what can be written to file. Only characters and spaces!
+                if (!string.substring(1, string.length - 1).match(/^.[a-z ]*$/i)) {
+                    _StdOut.putText("Files may only have characters and spaces written to them.");
+                    return;
+                }
+                var status_3 = _krnDiskDriver.diskWrite(args[0], string);
+                if (status_3 == SUCCESS) {
+                    TSOS.Control.hostDisk();
+                    _StdOut.putText("The file: " + args[0] + " has been successfully written to.");
+                    return;
+                }
+                else if (status_3 == FILE_NAME_DOESNT_EXIST) {
+                    _StdOut.putText("The file: " + args[0] + " does not exist.");
+                    return;
+                }
+                else if (status_3 == DISK_FULL) {
+                    _StdOut.putText("Unable to write to the file: " + args[0] + ". Not enough disk space to write!");
+                    return;
+                }
+            }
+            else {
+                _StdOut.putText("Usage: write <filename> \"<text>\"  Please supply a filename and text surrounded by quotes.");
+                return;
+            }
+        };
+        Shell.prototype.shellDeleteFile = function (args) {
+            if (args.length == 1) {
+                // make sure user can't delete swap files
+                if (args[0].includes("$")) {
+                    _StdOut.putText("Oman u do not wanna do dat");
+                    return;
+                }
+                var status = _krnDiskDriver.diskDelete(args[0]);
+                if (status == SUCCESS) {
+                    _StdOut.putText("The file: " + args[0] + " has been successfully deleted.");
+                    TSOS.Control.hostDisk();
+                    return;
+                }
+                else if (status == FILE_NAME_DOESNT_EXIST) {
+                    _StdOut.putText("The file: " + args[0] + " does not exist.");
+                    return;
+                }
+            }
+            else {
+                _StdOut.putText("Usage: delete <filename>  Please supply a filename.");
+                return;
+            }
         };
         return Shell;
     }());

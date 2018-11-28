@@ -23,6 +23,10 @@ const CONTEXT_SWITCH: number = 2;
 const PC_OUT_OF_BOUNDS: number = 3;
 const EXIT_PROCESS: number = 4;
 const CONSOLE_WRITE: number = 5;
+const SUCCESS = 0;
+const DISK_FULL = 1;
+const FILE_NAME_ALREADY_EXISTS = 2;
+const FILE_NAME_DOESNT_EXIST = 3;
 
 var RUNALL: boolean = false;
 var _RunningPartition: number = 0;
@@ -41,6 +45,7 @@ var _ProcessManager: TSOS.processManager;
 var _PID = 0;
 var _CPUScheduler: TSOS.CPUscheduler;
 var _Trace: boolean = true;  // Default the OS trace to be on.
+var _Disk: TSOS.Disk;
 
 // The OS Kernel and its queues.
 var _Kernel: TSOS.Kernel;
@@ -61,6 +66,7 @@ var _SarcasticMode: boolean = false;
 
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver; //  = null;
+var _krnDiskDriver : TSOS.deviceDriverDisk;
 
 var _hardwareClockID: number = null;
 

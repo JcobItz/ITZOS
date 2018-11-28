@@ -40,6 +40,9 @@ module TSOS {
             _krnKeyboardDriver = new DeviceDriverKeyboard();     // Construct it.
             _krnKeyboardDriver.driverEntry();                    // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+            _krnDiskDriver = new deviceDriverDisk();
+            _krnDiskDriver.DiskdriverEntry();
+            Control.hostDisk();
 
             //
             // ... more?
@@ -53,7 +56,7 @@ module TSOS {
             this.krnTrace("Creating and Launching the shell.");
             _OsShell = new Shell();
             _OsShell.init();
-
+            _Disk.init();
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();

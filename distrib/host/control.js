@@ -207,6 +207,8 @@ var TSOS;
             _MemoryManager = new TSOS.memoryManager();
             _ProcessManager = new TSOS.processManager();
             _CPUScheduler = new TSOS.CPUscheduler();
+            _Disk = new TSOS.Disk();
+            _Disk.init();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.
@@ -228,6 +230,41 @@ var TSOS;
             // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
+        };
+        Control.hostDisk = function () {
+            var table = document.getElementById('diskTable');
+            // Remove all rows
+            var rows = table.rows.length;
+            for (var i = 0; i < rows; i++) {
+                table.deleteRow(0);
+            }
+            var rowNum = 0;
+            // firefox sucks and doesn't keep session storage in order
+            // For each row, insert the TSB, available bit, pointer, and data into separate cells
+            for (var trackNum = 0; trackNum < _Disk.tracks; trackNum++) {
+                for (var sectorNum = 0; sectorNum < _Disk.sectors; sectorNum++) {
+                    for (var blockNum = 0; blockNum < _Disk.blocks; blockNum++) {
+                        // generate proper tsb id since firefox sucks and doesn't keep session storage ordered
+                        var tsbID = trackNum + ":" + sectorNum + ":" + blockNum;
+                        var row = table.insertRow(rowNum);
+                        rowNum++;
+                        row.style.backgroundColor = "white";
+                        var tsb = row.insertCell(0);
+                        tsb.innerHTML = tsbID;
+                        tsb.style.color = "lightcoral";
+                        var availableBit = row.insertCell(1);
+                        availableBit.innerHTML = JSON.parse(sessionStorage.getItem(tsbID)).availableBit;
+                        availableBit.style.color = "lightgreen";
+                        var pointer = row.insertCell(2);
+                        var pointerVal = JSON.parse(sessionStorage.getItem(tsbID)).pointer;
+                        pointer.innerHTML = pointerVal;
+                        pointer.style.color = "lightgray";
+                        var data = row.insertCell(3);
+                        data.innerHTML = JSON.parse(sessionStorage.getItem(tsbID)).data.join("").toString();
+                        data.style.color = "lightblue";
+                    }
+                }
+            }
         };
         return Control;
     }());

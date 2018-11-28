@@ -49,7 +49,7 @@ module TSOS {
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
-            }else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
+            }else if ((keyCode >= 48 && keyCode <= 58) ||   // digits
                         (keyCode == 32)                     ||   // space
                         (keyCode == 13)                     ||   // enter
                 (keyCode == 8) ||    //backspace
@@ -57,40 +57,45 @@ module TSOS {
                 (keyCode == 38) ||    //up arrow
                 (keyCode == 40) ||     //down arrow
                 (keyCode == 188) ||    //comma
-                (keyCode == 190)) {     //period           
+                (keyCode == 190) ||  //period  
+                (keyCode == 222)) {   //quote        
                 
                 chr = String.fromCharCode(keyCode);
                 if (isShifted) {
                     if (keyCode == 49) {
                         chr = "!";
                     }
-                    if (keyCode == 50) {
+                    else if (keyCode == 50) {
                         chr = "@";
                     }
-                    if (keyCode == 51) {
+                    else if (keyCode == 51) {
                         chr = "#";
                     }
-                    if (keyCode == 52) {
+                    else if (keyCode == 52) {
                         chr = "$";
 
                     }
-                    if (keyCode == 53) {
+                    else if (keyCode == 53) {
                         chr = "%";
                     }
-                    if (keyCode == 54) {
+                    else if (keyCode == 54) {
                         chr = "^";
                     }
-                    if (keyCode == 55) {
+                    else if (keyCode == 55) {
                         chr = "&";
                     }
-                    if (keyCode == 56) {
+                    else if (keyCode == 56) {
                         chr = "*";
                     }
-                    if (keyCode == 57) {
+                    else if (keyCode == 57) {
                         chr = "(";
                     }
-                    if (keyCode == 48) {
+                    else if (keyCode == 48) {
                         chr = ")";
+                    }
+                    else if (keyCode == 222) {
+                        chr = "\"";
+
                     }
                 }
                 if (keyCode == 188) {

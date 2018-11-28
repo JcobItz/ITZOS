@@ -20,6 +20,10 @@ var CONTEXT_SWITCH = 2;
 var PC_OUT_OF_BOUNDS = 3;
 var EXIT_PROCESS = 4;
 var CONSOLE_WRITE = 5;
+var SUCCESS = 0;
+var DISK_FULL = 1;
+var FILE_NAME_ALREADY_EXISTS = 2;
+var FILE_NAME_DOESNT_EXIST = 3;
 var RUNALL = false;
 var _RunningPartition = 0;
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
@@ -37,6 +41,7 @@ var _ProcessManager;
 var _PID = 0;
 var _CPUScheduler;
 var _Trace = true; // Default the OS trace to be on.
+var _Disk;
 // The OS Kernel and its queues.
 var _Kernel;
 var _KernelInterruptQueue; // Initializing this to null (which I would normally do) would then require us to specify the 'any' type, as below.
@@ -52,6 +57,7 @@ var _OsShell;
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver; //  = null;
+var _krnDiskDriver;
 var _hardwareClockID = null;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados.js on Labouseur.com.
