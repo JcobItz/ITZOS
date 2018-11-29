@@ -1,23 +1,27 @@
 var TSOS;
 (function (TSOS) {
     var CPUscheduler = /** @class */ (function () {
-        function CPUscheduler(quantum, timer) {
+        function CPUscheduler(quantum, timer, algorithm) {
             if (quantum === void 0) { quantum = 6; }
             if (timer === void 0) { timer = 0; }
+            if (algorithm === void 0) { algorithm = 'rr'; }
             this.quantum = quantum;
             this.timer = timer;
+            this.algorithm = algorithm;
             this.init(6);
         }
         CPUscheduler.prototype.init = function (q) {
             this.quantum = q;
         };
         CPUscheduler.prototype.watch = function () {
-            if (_ProcessManager.readyQueue.getSize() > 0) {
-                this.timer++;
-                _Kernel.krnTrace("" + this.timer);
-                if (this.timer == this.quantum) {
-                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH, 0));
-                    this.timer = 0;
+            if (this.algorithm == 'rr') {
+                if (_ProcessManager.readyQueue.getSize() > 0) {
+                    this.timer++;
+                    _Kernel.krnTrace("" + this.timer);
+                    if (this.timer == this.quantum) {
+                        _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH, 0));
+                        this.timer = 0;
+                    }
                 }
             }
         };
@@ -46,6 +50,12 @@ var TSOS;
             _CPU.Yreg = _ProcessManager.running.Yreg;
             _CPU.Zflag = _ProcessManager.running.Zflag;
             _CPUScheduler.watch();
+        };
+        CPUscheduler.prototype.setSchedule = function (alg) {
+            this.algorithm = alg;
+        };
+        CPUscheduler.prototype.getSchedule = function () {
+            _StdOut.putText("Current Sceduling Algorithm: " + this.algorithm);
         };
         return CPUscheduler;
     }());

@@ -25,6 +25,39 @@ var TSOS;
         deviceDriverDisk.prototype.DiskdriverEntry = function () {
             this.status = "loaded";
         };
+        deviceDriverDisk.prototype.ls = function () {
+            //lists all files present on the system
+            _StdOut.putText("filename                        date created");
+            _StdOut.advanceLine();
+            for (var s = 0; s < _Disk.sectors; s++) {
+                for (var b = 0; b < _Disk.blocks; b++) {
+                    if (s == 0 && b == 0) {
+                        continue;
+                    }
+                    //only look on first track, where the directory is
+                    var ID = "0:" + s + ":" + b;
+                    var block = JSON.parse(sessionStorage.getItem(ID));
+                    if (block.availableBit == "1") { //only get blocks that are in use
+                        var data = this.readData(ID);
+                        var string = "";
+                        var date = "";
+                        for (var i = 4; i < data.length; i++) {
+                            if (data[i] != "00") {
+                                string += String.fromCharCode(parseInt(data[i], 16));
+                            }
+                        }
+                        string += " - ";
+                        string += parseInt(data[0], 16) + "/";
+                        string += parseInt(data[1], 16) + "/";
+                        var year = "" + data[2] + "" + data[3];
+                        string += parseInt(year, 16);
+                        _StdOut.putText(string);
+                        _StdOut.advanceLine();
+                    }
+                }
+            }
+            return;
+        };
         deviceDriverDisk.prototype.alreadyExists = function (file) {
             var hexArr = this.toASCII(file);
             for (var s = 0; s < _Disk.sectors; s++) {
@@ -281,6 +314,9 @@ var TSOS;
                                 day = "0" + day; //again always display 2 digit day
                             }
                             var year = (date.getFullYear()).toString(16);
+                            if (year.length == 3) {
+                                year = "0" + year;
+                            }
                             //store date in first 4 bytes
                             dir.data[0] = month;
                             dir.data[1] = day;

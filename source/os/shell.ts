@@ -121,7 +121,7 @@ module TSOS {
 
             this.commandList[this.commandList.length] = sc;
             //run
-            sc = new ShellCommand(this.shellRun, "run", " - runs program in memory location $0000");
+            sc = new ShellCommand(this.shellRun, "run", " <PID> - runs program with the specified PID");
 
             this.commandList[this.commandList.length] = sc;
             //clearMem
@@ -153,19 +153,34 @@ module TSOS {
             this.commandList[this.commandList.length] = sc;
 
          
-            // read <filename> - reads a file
+            // read
             sc = new TSOS.ShellCommand(this.shellReadFile, "read", "<filename> - Reads a file given a filename");
             this.commandList[this.commandList.length] = sc;
         
-            // write <filename> - writes a file
+            // write 
             sc = new TSOS.ShellCommand(this.shellWriteFile, "write", "<filename> \"text\" - Writes text to a file given a filename");
             this.commandList[this.commandList.length] = sc;
             
-            // delete <filename> - deletes a file
+            // delete 
             sc = new TSOS.ShellCommand(this.shellDeleteFile, "delete", "<filename> - Deletes a file given a filename");
             this.commandList[this.commandList.length] = sc;
-            
-            
+
+            //format
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", " - re-initializes entire disk, overwriting all data residing in it");
+            this.commandList[this.commandList.length] = sc;
+
+            //list
+            sc = new TSOS.ShellCommand(this.shellLs, "ls", " - lists the names of all files in the filesystem");
+            this.commandList[this.commandList.length] = sc;
+
+            //setschedule
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "<algorithm> - changes the CPU scheduling algorith to the specified algorithm.  Algorithms: rr(round robin), fcfs(first come first serve), p(priority). ");
+            this.commandList[this.commandList.length] = sc;
+
+            //getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", " - Returns the name of the CPU scheduling algorithm running.");
+            this.commandList[this.commandList.length] = sc;
+
             this.TaskTime();
 
             
@@ -746,6 +761,23 @@ module TSOS {
                 return;
             }
         }
+        public shellFormat() {
+            _Disk.init();
+            Control.hostDisk();
+        }
+        public shellLs() {
+            _krnDiskDriver.ls();
+            return;
+        }
+        public shellSetSchedule(sched) {
+            _CPUScheduler.setSchedule(sched);
+            return;
+
+        }
+        public shellGetSchedule() {
+            _CPUScheduler.getSchedule();
+        }
+        
            
 
     }

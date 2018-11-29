@@ -1,18 +1,20 @@
 module TSOS {
     export class CPUscheduler{
-        public constructor(public quantum = 6, public timer = 0) {
+        public constructor(public quantum = 6, public timer = 0, public algorithm = 'rr') {
             this.init(6);
         }
         public init(q) {
             this.quantum = q;
         }
         public watch() {
-            if (_ProcessManager.readyQueue.getSize() > 0) {
-                this.timer++;
-                _Kernel.krnTrace(""+this.timer);
-                if (this.timer == this.quantum) {
-                    _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0));
-                    this.timer = 0;
+            if (this.algorithm == 'rr') {
+                if (_ProcessManager.readyQueue.getSize() > 0) {
+                    this.timer++;
+                    _Kernel.krnTrace("" + this.timer);
+                    if (this.timer == this.quantum) {
+                        _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0));
+                        this.timer = 0;
+                    }
                 }
             }
         }
@@ -49,7 +51,12 @@ module TSOS {
             
             
         }
-        
+        public setSchedule(alg) {
+            this.algorithm = alg;
+        }
+        public getSchedule() {
+            _StdOut.putText("Current Sceduling Algorithm: " + this.algorithm);
+        }
        
         
         
