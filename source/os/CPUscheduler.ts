@@ -7,15 +7,20 @@ module TSOS {
             this.quantum = q;
         }
         public watch() {
-            if (this.algorithm == 'rr') {
-                if (_ProcessManager.readyQueue.getSize() > 0) {
-                    this.timer++;
-                    _Kernel.krnTrace("" + this.timer);
-                    if (this.timer == this.quantum) {
-                        _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0));
-                        this.timer = 0;
+
+            switch (this.algorithm) {
+                case "rr":
+                    if (_ProcessManager.readyQueue.getSize() > 0) {
+                        this.timer++;
+                        _Kernel.krnTrace("" + this.timer);
+                        if (this.timer == this.quantum) {
+                            _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0));
+                            this.timer = 0;
+                        }
                     }
-                }
+                    break;
+                
+
             }
         }
         public unwatch() {

@@ -13,14 +13,14 @@ module TSOS {
             
         }
       
-        public createProcess(codes) {
+        public createProcess(codes, args) {
             //first make sure the op codes can fit within a partition
             if (codes.length > _MemoryManager.lim) {
                 _StdOut.putText("Failed loading user program, the program must be less than 256 bytes");
                 return;
             }
             //then make sure there is an available partition
-            var part = _MemoryManager.nextAvailable();
+            var part = _MemoryManager.nextAvailable(codes.length);
             if (part > -1) {
                 var p = new PCB(_PID);
                 p.init(part, codes.length);
@@ -29,10 +29,31 @@ module TSOS {
                 _PID++;
                 this.residentQueue.enqueue(p);
                 
-                _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable());
+                _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable(codes.length));
                 
             } else {
-                _StdOut.putText("There are no available memory partitions, please use the cleamMem command to clear all partitions, or clearPartition to clear one.");
+                //load it into disk
+                var id = _Swap.swapToDisk(codes, _PID);
+                if (id != null) {
+                    var pcb = new PCB(_PID);
+                    pcb.init(999, 999);
+                    if (args!= null && args.length > 0) {
+                        pcb.priority = args[0];
+                    } else {
+                        pcb.priority = 1;
+                    }
+                    pcb.swapped = true;
+                    pcb.State = "Swapped";
+                    this.residentQueue.enqueue(pcb);
+                    _StdOut.putText("Program loaded into swap memory with PID: " + _PID); 
+                    _PID++;
+
+
+                } else {
+                    _StdOut.putText("Program loading failed, no memory available");
+                }
+
+
             }
            
         }

@@ -42,6 +42,7 @@ var _PID = 0;
 var _CPUScheduler;
 var _Trace = true; // Default the OS trace to be on.
 var _Disk;
+var _Swap;
 // The OS Kernel and its queues.
 var _Kernel;
 var _KernelInterruptQueue; // Initializing this to null (which I would normally do) would then require us to specify the 'any' type, as below.

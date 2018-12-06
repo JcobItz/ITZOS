@@ -57,6 +57,7 @@ module TSOS {
             _OsShell = new Shell();
             _OsShell.init();
             _Disk.init();
+            _Swap = new processSwap();
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();

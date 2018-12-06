@@ -151,6 +151,50 @@ module TSOS {
             //update the session storage
             sessionStorage.setItem(currentID, JSON.stringify(currBlock));
         }
+        public writeSwap(fname, codes) {
+            var hex = this.toASCII(fname);
+            for (var s = 0; s < _Disk.sectors; s++) {
+                for (var b = 0; b < _Disk.blocks; b++) {
+                    if (s == 0 && b == 0) {
+                        //ignore mbr
+                        continue;
+                    }
+                    var ID = "0" + ":" + s + ":" + b;
+                    var dir = JSON.parse(sessionStorage.getItem(ID));
+                    var fileFound = true;
+                    if (dir.availableBit == "1") {//only check blocks in use
+                        for (var i = 4, j = 0; j < hex.length; i++ , j++) {
+                            if (hex[j] != dir.data[i]) {
+                                fileFound = false;
+                            }
+                        }
+                        //at the end of the hex array make sure there isn't more data in dir after it
+                        if (dir.data[hex.length + 4] != "00") {
+                            fileFound = false;
+                        }
+                        if (fileFound) {
+                            //allocate sufficient space for codes
+                            //put codes into a data block
+                            var dataBlock = JSON.parse(sessionStorage.getItem(dir.pointer));
+                            dataBlock.availableBit = "0";
+                            sessionStorage.setItem(dir.pointer, JSON.stringify(dataBlock));
+                            var loc = this.allocateDiskSpace(codes, dir.pointer);
+                            if (!loc) {
+                                return DISK_FULL;
+                            }
+                            this.writeData(dir.pointer, codes);
+                            return SUCCESS;
+
+                           
+                        }
+
+
+                    }
+                }
+            }
+            return FILE_NAME_DOESNT_EXIST;
+
+        }
         public readData(ID) {
             _Kernel.krnTrace("Shell: Reading data in location: " + ID);
             var block = JSON.parse(sessionStorage.getItem(ID));
@@ -224,7 +268,8 @@ module TSOS {
                                 }
                             }
                             console.log("finished the loop");
-                            return fileData.join("");
+                            var retVal = [data, fileData];
+                            return retVal;
                         }
                     }
                 }

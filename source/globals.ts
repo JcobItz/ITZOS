@@ -46,7 +46,7 @@ var _PID = 0;
 var _CPUScheduler: TSOS.CPUscheduler;
 var _Trace: boolean = true;  // Default the OS trace to be on.
 var _Disk: TSOS.Disk;
-
+var _Swap: TSOS.processSwap;
 // The OS Kernel and its queues.
 var _Kernel: TSOS.Kernel;
 var _KernelInterruptQueue;          // Initializing this to null (which I would normally do) would then require us to specify the 'any' type, as below.

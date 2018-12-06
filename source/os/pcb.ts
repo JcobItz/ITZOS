@@ -11,7 +11,9 @@ module TSOS {
         public partition;
         public base;
         public limit;
-
+        public swapped;
+        public TSB;
+        public priority;
         public constructor(processID) {
             //makes a new PCB with specified pid
             this.pid = processID;
@@ -27,8 +29,15 @@ module TSOS {
             this.Yreg = 0;
             this.Zflag = 0;
             this.partition = part;
-            this.base = _MemoryManager.partitions[part].base;
+            if (this.partition != 999) {
+                this.base = _MemoryManager.partitions[part].base;
+            } else {
+                this.base = 999;
+            }
             this.limit = end;
+            this.swapped = false;
+            this.TSB = "0:0:0";
+            this.priority = 0;
         }
         public isLast() {
             Control.hostLog("PC: " + this.PC + " END:" + this.limit, "PCB");

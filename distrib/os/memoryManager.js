@@ -41,10 +41,10 @@ var TSOS;
             }
             return false;
         };
-        memoryManager.prototype.nextAvailable = function () {
+        memoryManager.prototype.nextAvailable = function (size) {
             //loops through the specified partition and returns the first available index
             for (var i = 0; i < this.partitions.length; i++) {
-                if (this.partitions[i].isEmpty) {
+                if (this.partitions[i].isEmpty && this.partitions[i].limit >= size) {
                     return i;
                 }
             }
@@ -64,6 +64,15 @@ var TSOS;
         //returns the base of the specified partition(p)
         memoryManager.prototype.getBase = function (p) {
             return this.partitions[p].base;
+        };
+        memoryManager.prototype.getPartitionData = function (part) {
+            var data = [];
+            var base = this.partitions[part].base;
+            var limit = base + this.partitions[part].limit;
+            for (var i = base; i < limit; i++) {
+                data.push(_Mem.memoryArr[i]);
+            }
+            return data;
         };
         return memoryManager;
     }());

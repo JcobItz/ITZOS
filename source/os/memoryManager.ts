@@ -40,10 +40,10 @@ module TSOS {
             }
             return false;
         }
-        public nextAvailable(): number {
+        public nextAvailable(size): number {
             //loops through the specified partition and returns the first available index
             for (var i = 0; i < this.partitions.length; i++) {
-                if (this.partitions[i].isEmpty) {
+                if (this.partitions[i].isEmpty && this.partitions[i].limit >= size) {
                     return i;
                 }
                 
@@ -64,6 +64,16 @@ module TSOS {
         //returns the base of the specified partition(p)
         public getBase(p): number {
             return this.partitions[p].base;
+        }
+        public getPartitionData(part) {
+            var data = [];
+            var base = this.partitions[part].base;
+            var limit = base + this.partitions[part].limit;
+            for (var i = base; i < limit; i++) {
+                data.push(_Mem.memoryArr[i]);
+            }
+            return data;
+
         }
 
     }

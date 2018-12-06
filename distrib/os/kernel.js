@@ -50,6 +50,7 @@ var TSOS;
             _OsShell = new TSOS.Shell();
             _OsShell.init();
             _Disk.init();
+            _Swap = new TSOS.processSwap();
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();
