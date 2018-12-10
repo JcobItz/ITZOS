@@ -150,6 +150,7 @@ var TSOS;
                         }
                         else {
                             _KernelInterruptQueue.enqueue(new TSOS.Interrupt(EXIT_PROCESS, RUNALL));
+                            _Kernel.krnTrace("Exiting process");
                         }
                         TSOS.Control.hostMemory();
                         TSOS.Control.updatePCBDisp();

@@ -150,6 +150,8 @@ module TSOS {
             currBlock.pointer = "0:0:0";
             //update the session storage
             sessionStorage.setItem(currentID, JSON.stringify(currBlock));
+            Control.hostDisk();
+            
         }
         public writeSwap(fname, codes) {
             var hex = this.toASCII(fname);

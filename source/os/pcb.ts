@@ -19,7 +19,7 @@ module TSOS {
             this.pid = processID;
 
         }
-        public init(part, end) {
+        public init(part, length) {
             //initializes the rest of the PCB data
             this.State = "Ready";
             this.PC = 0;
@@ -34,7 +34,7 @@ module TSOS {
             } else {
                 this.base = 999;
             }
-            this.limit = end;
+            this.limit = length;
             this.swapped = false;
             this.TSB = "0:0:0";
             this.priority = 0;

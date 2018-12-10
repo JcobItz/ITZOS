@@ -19,19 +19,21 @@ var TSOS;
             //moves a process from disk to main memory
             var fname = "$SWAP" + pcb.pid;
             var codes = _krnDiskDriver.diskRead(fname)[0];
-            var extra = Math.ceil(_MemoryManager.lim / _Disk.dataSize) * _Disk.dataSize;
-            for (var i = 0; i < extra - _MemoryManager.lim; i++) {
+            var extra = _MemoryManager.lim - pcb.limit;
+            for (var i = 0; i < extra; i++) {
                 codes.pop();
             }
             if (_MemoryManager.hasSpace(codes.length)) {
                 var partition = _MemoryManager.nextAvailable(codes.length);
                 _MemoryManager.loadIn(codes, partition);
+                _Kernel.krnTrace("Rolling In");
                 pcb.partition = partition;
                 _krnDiskDriver.diskDelete(fname);
                 TSOS.Control.hostMemory();
                 TSOS.Control.hostDisk();
             }
             else {
+                _Kernel.krnTrace("Rolling out");
                 this.rollOut(pcb);
             }
         };
@@ -40,17 +42,19 @@ var TSOS;
             var fname = "$SWAP" + pcb.pid;
             //decide which memory partition to swap it with(don't wanna pick favorites though)
             var part_to_swap = Math.floor(Math.random() * _MemoryManager.partitions.length);
+            _Kernel.krnTrace("Got partition to swap");
             var pcb_to_swap = this.findPCB(part_to_swap);
+            _Kernel.krnTrace("Got PCB to swap");
             if (pcb_to_swap != null) {
                 var memData = _MemoryManager.getPartitionData(part_to_swap);
                 _MemoryManager.clearMem(part_to_swap);
                 var data = _krnDiskDriver.diskRead(fname)[0];
-                var extra = Math.ceil(_MemoryManager.lim / _Disk.dataSize) * _Disk.dataSize;
-                for (var i = 0; i < extra - _MemoryManager.lim; i++) {
+                var extra = _MemoryManager.lim - pcb.limit;
+                for (var i = 0; i < extra; i++) {
                     data.pop();
                 }
                 if (_MemoryManager.hasSpace(data.length)) {
-                    var part = _MemoryManager.nextAvailable();
+                    var part = _MemoryManager.nextAvailable(data.length);
                     _MemoryManager.loadIn(data, part);
                     pcb.partition = part;
                     pcb.swapped = false;
@@ -68,6 +72,7 @@ var TSOS;
                     pcb_to_swap.State = "Swapped";
                     pcb_to_swap.TSB = memoryToDiskID;
                     TSOS.Control.hostLog("Performed roll out and roll in", "os");
+                    _ProcessManager.updatePCB();
                     TSOS.Control.updatePCBDisp();
                     TSOS.Control.hostMemory();
                     TSOS.Control.hostDisk();

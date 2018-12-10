@@ -5,7 +5,7 @@ var TSOS;
             //makes a new PCB with specified pid
             this.pid = processID;
         }
-        PCB.prototype.init = function (part, end) {
+        PCB.prototype.init = function (part, length) {
             //initializes the rest of the PCB data
             this.State = "Ready";
             this.PC = 0;
@@ -21,7 +21,7 @@ var TSOS;
             else {
                 this.base = 999;
             }
-            this.limit = end;
+            this.limit = length;
             this.swapped = false;
             this.TSB = "0:0:0";
             this.priority = 0;

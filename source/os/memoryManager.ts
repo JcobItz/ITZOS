@@ -35,6 +35,7 @@ module TSOS {
         public hasSpace(size) {
             for (var i = 0; i < this.partitions.length; i++) {
                 if (this.partitions[i].isEmpty && this.partitions[i].limit >= size) {
+                    _Kernel.krnTrace("has space");
                     return true;
                 }
             }

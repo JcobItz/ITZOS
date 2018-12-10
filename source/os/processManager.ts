@@ -28,19 +28,19 @@ module TSOS {
                 _Console.putText("Loaded process with PID " + _PID);
                 _PID++;
                 this.residentQueue.enqueue(p);
-                
+                //then load it into memory
                 _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable(codes.length));
                 
             } else {
                 //load it into disk
-                var id = _Swap.swapToDisk(codes, _PID);
-                if (id != null) {
-                    var pcb = new PCB(_PID);
-                    pcb.init(999, 999);
-                    if (args!= null && args.length > 0) {
+                var id = _Swap.swapToDisk(codes, _PID);  // first create the file name
+                if (id != null) { 
+                    var pcb = new PCB(_PID); // create the PCB today
+                    pcb.init(999, codes.length);  // 999 denotes a process in swap
+                    if (args!= null && args.length > 0) { // add the priority if there is one
                         pcb.priority = args[0];
                     } else {
-                        pcb.priority = 1;
+                        pcb.priority = 1;//  if not just make it 1
                     }
                     pcb.swapped = true;
                     pcb.State = "Swapped";
@@ -62,8 +62,10 @@ module TSOS {
            
             if (this.running != void 0) {
                 if (this.running.pid == pid) {
+                    _MemoryManager.clearMem(this.running.partition);
                     this.running = void 0;
                     _Kernel.krnTrace("removed pid " + pid + "(running process)");
+                    
                 }
             }
 
@@ -124,8 +126,20 @@ module TSOS {
                 _CPU.Xreg = this.running.Xreg;
                 _CPU.Yreg = this.running.Yreg;
                 _CPU.Zflag = this.running.Zflag;
-                this.running.State = "running";
+               
                 _CPU.isExecuting = true;
+                if (this.running.swapped) {
+                    // if its swapped we have to roll in.
+                    _Swap.rollIn(this.running);
+                    this.running.swapped = false;
+                    this.running.TSB = "0:0:0";
+                }
+                this.running.State = "running";
+               
+                Control.updatePCBDisp();
+                Control.hostMemory();
+                Control.updateCPUDisp();
+
                 
             }
         }

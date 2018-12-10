@@ -163,6 +163,7 @@ module TSOS {
                             
                         } else {
                             _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
+                            _Kernel.krnTrace("Exiting process");
                         }
                         Control.hostMemory();
                         Control.updatePCBDisp();

@@ -25,6 +25,20 @@ var TSOS;
                         }
                     }
                     break;
+                case "fcfs":
+                    if (_ProcessManager.readyQueue.getSize() > 0) {
+                        if (_ProcessManager.running.isLast()) {
+                            _KernelInterruptQueue(new TSOS.Interrupt(CONTEXT_SWITCH, 0));
+                        }
+                    }
+                    break;
+                case "priority":
+                    if (_ProcessManager.readyQueue.getSize() > 0) {
+                        if (_ProcessManager.running.isLast()) {
+                            _KernelInterruptQueue(new TSOS.Interrupt(CONTEXT_SWITCH, 0));
+                        }
+                    }
+                    break;
             }
         };
         CPUscheduler.prototype.unwatch = function () {
@@ -39,19 +53,44 @@ var TSOS;
                     _ProcessManager.readyQueue.enqueue(_ProcessManager.running);
                 }
                 else {
-                    _ProcessManager.residentQueue.enqueue(_ProcessManager.running);
+                    _ProcessManager.remove(_ProcessManager.running.pid);
                 }
                 _ProcessManager.running = void 0;
             }
             _ProcessManager.running = _ProcessManager.readyQueue.dequeue();
-            _Kernel.krnTrace("Switching Context");
-            _CPU.PC = _ProcessManager.running.PC;
-            _CPU.IR = _ProcessManager.running.IR;
-            _CPU.Acc = _ProcessManager.running.Acc;
-            _CPU.Xreg = _ProcessManager.running.Xreg;
-            _CPU.Yreg = _ProcessManager.running.Yreg;
-            _CPU.Zflag = _ProcessManager.running.Zflag;
-            _CPUScheduler.watch();
+            if (_ProcessManager.running != void 0) {
+                if (!_ProcessManager.running.swapped) {
+                    _Kernel.krnTrace("Switching Context");
+                    _CPU.PC = _ProcessManager.running.PC;
+                    _CPU.IR = _ProcessManager.running.IR;
+                    _CPU.Acc = _ProcessManager.running.Acc;
+                    _CPU.Xreg = _ProcessManager.running.Xreg;
+                    _CPU.Yreg = _ProcessManager.running.Yreg;
+                    _CPU.Zflag = _ProcessManager.running.Zflag;
+                    _CPUScheduler.watch();
+                }
+                else {
+                    _Swap.rollIn(_ProcessManager.running);
+                    _ProcessManager.updatePCB();
+                    _Kernel.krnTrace("Switching Context");
+                    _CPU.PC = _ProcessManager.running.PC;
+                    _CPU.IR = _ProcessManager.running.IR;
+                    _CPU.Acc = _ProcessManager.running.Acc;
+                    _CPU.Xreg = _ProcessManager.running.Xreg;
+                    _CPU.Yreg = _ProcessManager.running.Yreg;
+                    _CPU.Zflag = _ProcessManager.running.Zflag;
+                    _CPUScheduler.watch();
+                }
+            }
+            else {
+                _Kernel.krnTrace("Switching Context");
+                _CPU.PC = 0;
+                _CPU.IR = "00";
+                _CPU.Acc = 0;
+                _CPU.Xreg = 0;
+                _CPU.Yreg = 0;
+                _CPU.Zflag = 0;
+            }
         };
         CPUscheduler.prototype.setSchedule = function (alg) {
             this.algorithm = alg;

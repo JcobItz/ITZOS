@@ -153,6 +153,7 @@ var TSOS;
             currBlock.pointer = "0:0:0";
             //update the session storage
             sessionStorage.setItem(currentID, JSON.stringify(currBlock));
+            TSOS.Control.hostDisk();
         };
         deviceDriverDisk.prototype.writeSwap = function (fname, codes) {
             var hex = this.toASCII(fname);
