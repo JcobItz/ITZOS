@@ -30,6 +30,7 @@ var TSOS;
             this.partitions[part].isEmpty = false; //set the empty indicator accordingly
             TSOS.Control.hostMemory(); //update memory 
             TSOS.Control.updatePCBDisp();
+            _Kernel.krnTrace("Memory manager loaded code into partition: " + part);
             return;
         };
         //check if there is enough space for the given op codes where size = the number of op codes
@@ -49,7 +50,6 @@ var TSOS;
                     return i;
                 }
             }
-            return -1;
         };
         memoryManager.prototype.clearMem = function (p) {
             for (var i = this.partitions[p].base; i < this.partitions[p].base + this.partitions[p].limit; i++) {
@@ -67,6 +67,7 @@ var TSOS;
             return this.partitions[p].base;
         };
         memoryManager.prototype.getPartitionData = function (part) {
+            //returns the codes in the specified partition
             var data = [];
             var base = this.partitions[part].base;
             var limit = base + this.partitions[part].limit;

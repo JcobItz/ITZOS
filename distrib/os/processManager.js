@@ -17,6 +17,26 @@ var TSOS;
             this.residentQueue = new TSOS.Queue(q);
             this.readyQueue = new TSOS.Queue(qq);
         };
+        processManager.prototype.getTopPriority = function () {
+            var size = this.readyQueue.getSize();
+            var top;
+            for (var i = 0; i < size; i++) {
+                var pcb = this.readyQueue.dequeue();
+                if (top == null) {
+                    top = pcb;
+                }
+                else {
+                    if (pcb.priority < top.priority) {
+                        this.readyQueue.enqueue(top);
+                        top = pcb;
+                    }
+                    else {
+                        this.readyQueue.enqueue(pcb);
+                    }
+                }
+            }
+            return top;
+        };
         processManager.prototype.createProcess = function (codes, args) {
             //first make sure the op codes can fit within a partition
             if (codes.length > _MemoryManager.lim) {
@@ -28,19 +48,26 @@ var TSOS;
             if (part > -1) {
                 var p = new TSOS.PCB(_PID);
                 p.init(part, codes.length);
+                if (args != null && args.length > 0) { // add the priority if there is one
+                    p.priority = args[0];
+                }
+                else {
+                    p.priority = 1; //  if not just make it 1
+                }
                 TSOS.Control.hostLog("Loaded process with PID " + _PID);
                 _Console.putText("Loaded process with PID " + _PID);
                 _PID++;
                 this.residentQueue.enqueue(p);
                 //then load it into memory
-                _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable(codes.length));
+                _MemoryManager.loadIn(codes, part);
             }
             else {
                 //load it into disk
+                var prevLength = codes.length;
                 var id = _Swap.swapToDisk(codes, _PID); // first create the file name
                 if (id != null) {
                     var pcb = new TSOS.PCB(_PID); // create the PCB today
-                    pcb.init(999, codes.length); // 999 denotes a process in swap
+                    pcb.init(999, prevLength); // 999 denotes a process in swap
                     if (args != null && args.length > 0) { // add the priority if there is one
                         pcb.priority = args[0];
                     }
@@ -50,6 +77,7 @@ var TSOS;
                     pcb.swapped = true;
                     pcb.State = "Swapped";
                     this.residentQueue.enqueue(pcb);
+                    TSOS.Control.updatePCBDisp();
                     _StdOut.putText("Program loaded into swap memory with PID: " + _PID);
                     _PID++;
                 }
@@ -67,17 +95,20 @@ var TSOS;
                     _Kernel.krnTrace("removed pid " + pid + "(running process)");
                 }
             }
-            for (var i = 0; i < this.readyQueue.getSize(); i++) {
-                var pro = this.readyQueue.dequeue();
-                if (pro.pid == pid) {
-                    _Kernel.krnTrace("removed pid " + pid);
-                    return;
-                }
-                else {
-                    this.readyQueue.enqueue(pro);
+            else {
+                for (var i = 0; i < this.readyQueue.getSize(); i++) {
+                    var pro = this.readyQueue.dequeue();
+                    if (pro.pid == pid) {
+                        _Kernel.krnTrace("removed pid " + pid);
+                        return;
+                    }
+                    else {
+                        this.readyQueue.enqueue(pro);
+                    }
                 }
             }
             TSOS.Control.updatePCBDisp();
+            TSOS.Control.hostMemory();
         };
         processManager.prototype.updatePCB = function () {
             //updates the Data in the PCB

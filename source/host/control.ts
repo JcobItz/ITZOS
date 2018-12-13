@@ -82,8 +82,8 @@ module TSOS {
                     table.rows[i].cells.item(j).style.color = "black";
                     table.rows[i].cells.item(j).style['font-weight'] = "normal";
                     // Check to see if the hex needs a leading zero.
-                    // If it does, then convert the hex to decimal, then back to hex, and add a leading zero.
-                    // We do that seemingly dumb step because if the value stored in memory already has a leading 0, will make display look gross.
+                    // If it does convert it to decimal and throw the zero in
+                    
                     var dec = parseInt(_Mem.memoryArr[pointer].toString(), 16);
                     if (dec < 16 && dec > 0) {
                         table.rows[i].cells.item(j).innerHTML = "0" + dec.toString(16).toUpperCase();
@@ -119,18 +119,29 @@ module TSOS {
             //updates the PCB display
             var table = <HTMLTableElement>document.getElementById('processes');
             //first remove all the rows from the table so we don't have duplicates
-            for (var x = 1; x < table.rows.length; x++) {
-                table.deleteRow(x);
+            while(table.rows.length > 1) {//make sure we don't remove the thead because that would look like trash
+                table.deleteRow(1);
+                
             }
             
-            for (var i = 0; i < _ProcessManager.residentQueue.getSize(); i++) {
 
-                var p:PCB = _ProcessManager.residentQueue.dequeue();
-                if (p.isLast()) {
-                    p.State = "Completed";
-                }
+            var resQ = []
+            //load all the resident processes into an array
+            var resSize = _ProcessManager.residentQueue.getSize();
+            for (var i = 0; i < resSize; i++) {
+                var pr = _ProcessManager.residentQueue.dequeue();
+                resQ.push(pr);
+                _ProcessManager.residentQueue.enqueue(pr);
 
-                var row = table.insertRow(i + 1);
+
+            }
+            //then add the PCB rows accordingly
+            while(resQ.length > 0) {
+
+                var p:PCB = resQ.shift();
+                
+            
+                var row = table.insertRow(-1);
                 var PID = row.insertCell(0);
                 PID.innerHTML = "" + p.pid;
                 var PC = row.insertCell(1);
@@ -149,25 +160,33 @@ module TSOS {
                 State.innerHTML = "" + p.State;
                 var part = row.insertCell(8);
                 part.innerHTML = "" + p.partition;
+                var end = row.insertCell(9);
+                end.innerHTML = "" + p.limit;
                 
-                _ProcessManager.residentQueue.enqueue(p);
             }
-            
+            //first remove all the rows from the table so we don't have duplicates
             var table2 = <HTMLTableElement>document.getElementById('readyprocesses');
-            for (var x = 1; x < table2.rows.length; x++) {
-                table2.deleteRow(x);
+            while (table2.rows.length > 1) {
+                table2.deleteRow(1);
+
+            }
+            var size = _ProcessManager.readyQueue.getSize()
+            var readyQ = [];
+            //then load all the ready processes into an array
+            for (var i = 0; i < size; i++) {
+                var pr = _ProcessManager.readyQueue.dequeue();
+                readyQ.push(pr);
+                _ProcessManager.readyQueue.enqueue(pr);
             }
 
            
-            var size = _ProcessManager.readyQueue.getSize()
-            for (var i = 0; i < size; i++) {
+            //and add all the ready PCB rowws accordingly
+            while(readyQ.length > 0) {
 
-                var p: PCB = _ProcessManager.readyQueue.dequeue();
-                if (p.isLast()) {
-                    p.State = "Completed";
-                }
+                var p: PCB = readyQ.shift();
+              
 
-                var row = table2.insertRow(i + 1);
+                var row = table2.insertRow(-1);
                 var PID = row.insertCell(0);
                 PID.innerHTML = "" + p.pid;
                 var PC = row.insertCell(1);
@@ -186,8 +205,9 @@ module TSOS {
                 State.innerHTML = "" + p.State;
                 var part = row.insertCell(8);
                 part.innerHTML = "" + p.partition;
-
-                _ProcessManager.readyQueue.enqueue(p);
+                var end = row.insertCell(9);
+                end.innerHTML = "" + p.limit;
+               
             }
             
         }

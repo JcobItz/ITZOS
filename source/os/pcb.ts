@@ -35,11 +35,13 @@ module TSOS {
                 this.base = 999;
             }
             this.limit = length;
+            
             this.swapped = false;
             this.TSB = "0:0:0";
             this.priority = 0;
         }
         public isLast() {
+            //Checks if the PCB is completed
             Control.hostLog("PC: " + this.PC + " END:" + this.limit, "PCB");
             if (this.PC >= this.limit) {
                 return true;

@@ -12,7 +12,25 @@ module TSOS {
             this.readyQueue = new Queue(qq);
             
         }
-      
+        public getTopPriority(): PCB {
+            //returns the PCB with the highest priority(lowest integer)
+            var size = this.readyQueue.getSize();
+            var top;
+            for (var i = 0; i < size; i++) {
+                var pcb = this.readyQueue.dequeue();
+                if (top == null) {
+                    top = pcb;
+                } else {
+                    if (pcb.priority < top.priority) {
+                        this.readyQueue.enqueue(top);
+                        top = pcb;
+                    } else {
+                        this.readyQueue.enqueue(pcb);
+                    }
+                }
+            }
+            return top;
+        }
         public createProcess(codes, args) {
             //first make sure the op codes can fit within a partition
             if (codes.length > _MemoryManager.lim) {
@@ -24,19 +42,26 @@ module TSOS {
             if (part > -1) {
                 var p = new PCB(_PID);
                 p.init(part, codes.length);
+                if (args != null && args.length > 0) { // add the priority if there is one
+                    p.priority = args[0];
+                } else {
+                    p.priority = 1;//  if not just make it 1
+                }
                 Control.hostLog("Loaded process with PID " + _PID);
                 _Console.putText("Loaded process with PID " + _PID);
                 _PID++;
                 this.residentQueue.enqueue(p);
                 //then load it into memory
-                _MemoryManager.loadIn(codes, _MemoryManager.nextAvailable(codes.length));
+                _MemoryManager.loadIn(codes, part);
                 
             } else {
                 //load it into disk
+                var prevLength = codes.length;
                 var id = _Swap.swapToDisk(codes, _PID);  // first create the file name
+                
                 if (id != null) { 
                     var pcb = new PCB(_PID); // create the PCB today
-                    pcb.init(999, codes.length);  // 999 denotes a process in swap
+                    pcb.init(999, prevLength);  // 999 denotes a process in swap
                     if (args!= null && args.length > 0) { // add the priority if there is one
                         pcb.priority = args[0];
                     } else {
@@ -45,6 +70,7 @@ module TSOS {
                     pcb.swapped = true;
                     pcb.State = "Swapped";
                     this.residentQueue.enqueue(pcb);
+                    Control.updatePCBDisp();
                     _StdOut.putText("Program loaded into swap memory with PID: " + _PID); 
                     _PID++;
 
@@ -65,30 +91,26 @@ module TSOS {
                     _MemoryManager.clearMem(this.running.partition);
                     this.running = void 0;
                     _Kernel.krnTrace("removed pid " + pid + "(running process)");
-                    
+
+                }
+            } else {
+
+                for (var i = 0; i < this.readyQueue.getSize(); i++) {
+                    var pro: TSOS.PCB = this.readyQueue.dequeue();
+                    if (pro.pid == pid) {
+                        _Kernel.krnTrace("removed pid " + pid);
+                        return
+                    } else {
+                        this.readyQueue.enqueue(pro);
+
+                    }
+
                 }
             }
 
-            for (var i = 0; i < this.readyQueue.getSize(); i++) {
-                var pro: TSOS.PCB = this.readyQueue.dequeue();
-                if (pro.pid == pid) {
-                    _Kernel.krnTrace("removed pid " + pid);
-                    return
-                } else {
-                    this.readyQueue.enqueue(pro);
-                    
-                }
-
-            }
             
-
-           
-
-
-           
-
-
             Control.updatePCBDisp();
+            Control.hostMemory();
         }
         
         public updatePCB() {
@@ -103,6 +125,7 @@ module TSOS {
             
         }
         public runAll() {
+            //loads all processes into ready queue and begins execution, setting RUNALL global variable to true
             _Kernel.krnTrace("Running all loaded processes");
             RUNALL = true;
             while (!this.residentQueue.isEmpty()) {
@@ -114,9 +137,10 @@ module TSOS {
             
         }
         public run() {
+            //runs the next process on the ready queue
             Control.hostLog("Running", "Process Manager");
             if (!this.isEmpty()) {
-                Control.hostLog("not empty", "Process Manager");
+                
                 
                 this.running = this.readyQueue.dequeue();
                 _RunningPartition = this.running.partition;
@@ -144,6 +168,7 @@ module TSOS {
             }
         }
         public listPs(): number[] {
+            //lists the processes in the ready queue
             var ps = [];
             for (var i = 0; i < this.readyQueue.getSize(); i++) {
                 var p: PCB = this.readyQueue.dequeue();
@@ -153,6 +178,7 @@ module TSOS {
             return ps;
         }
         public isEmpty() {
+            //returns true of the readyqueue is empty
             
             return this.readyQueue.isEmpty();
         }

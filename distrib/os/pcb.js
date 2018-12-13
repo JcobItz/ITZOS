@@ -27,6 +27,7 @@ var TSOS;
             this.priority = 0;
         };
         PCB.prototype.isLast = function () {
+            //Checks if the PCB is completed
             TSOS.Control.hostLog("PC: " + this.PC + " END:" + this.limit, "PCB");
             if (this.PC >= this.limit) {
                 return true;

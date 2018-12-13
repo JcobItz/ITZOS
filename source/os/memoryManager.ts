@@ -27,7 +27,7 @@ module TSOS {
             Control.hostMemory();//update memory 
             
             Control.updatePCBDisp();
-            
+            _Kernel.krnTrace("Memory manager loaded code into partition: " + part);
             
             return;
         }
@@ -49,7 +49,7 @@ module TSOS {
                 }
                 
             }
-            return -1;
+            
         }
         public clearMem(p:number) {
             for (var i = this.partitions[p].base; i < this.partitions[p].base + this.partitions[p].limit; i++) {
@@ -67,6 +67,7 @@ module TSOS {
             return this.partitions[p].base;
         }
         public getPartitionData(part) {
+            //returns the codes in the specified partition
             var data = [];
             var base = this.partitions[part].base;
             var limit = base + this.partitions[part].limit;

@@ -71,7 +71,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellTrigger, "trigger", " - Triggers a BSOD");
             this.commandList[this.commandList.length] = sc;
             //load
-            sc = new TSOS.ShellCommand(this.shellLoad, "load", " - validates hex code in program input.");
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "<int:priority> - validates hex code in program input and creates a new process which is loaded into memory. <int:priority> is optional");
             this.commandList[this.commandList.length] = sc;
             //run
             sc = new TSOS.ShellCommand(this.shellRun, "run", " <PID> - runs program with the specified PID");
@@ -221,7 +221,6 @@ var TSOS;
                 _StdOut.putText("must be the pride of [subject hometown here].");
             }
             else {
-                _StdOut.putText(this.shellSpellCheck());
                 _StdOut.putText("Type 'help' for, well... help.");
             }
         };
@@ -449,7 +448,7 @@ var TSOS;
             //triggers an OS error
             _Kernel.krnTrapError("Routine test");
         };
-        Shell.prototype.shellLoad = function () {
+        Shell.prototype.shellLoad = function (args) {
             //validates user program input and loads it into main memory
             var input = document.getElementById("taProgramInput");
             var hex = [];
@@ -470,7 +469,7 @@ var TSOS;
             }
             _StdOut.putText("Input Validated."); // if all the codes are valid, tell the user
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _ProcessManager.createProcess(hex, null); //then load them into memory 
+            _ProcessManager.createProcess(hex, args); //then load them into memory 
         };
         Shell.prototype.shellSpellCheck = function () {
             //checks the spelling of commands
@@ -536,7 +535,6 @@ var TSOS;
             _CPUScheduler.quantum = q;
         };
         Shell.prototype.shellCreateFile = function (f) {
-            alert(f);
             if (f.length > 56) {
                 _StdOut.putText("File name length too long! Must be " + 56 + " characters or less.");
                 return;
@@ -565,25 +563,22 @@ var TSOS;
             }
         };
         Shell.prototype.shellReadFile = function (f) {
-            console.log("SHell attempting to read file: " + f);
             _Kernel.krnTrace("Shell: attempting to read file" + f);
             _Kernel.krnTrace("checking for $");
             for (var i = 0; i < f.length; i++) {
                 if (f.toString().charAt(i) == "$") {
-                    _StdOut.putText("Oman u do not wanna do dat");
+                    _StdOut.putText("Look, you aren't the OS... you cant be trying to talk to my processes...");
                     return;
                 }
             }
-            console.log("finished checking for $");
             _Kernel.krnTrace("Shell: Finished checking for $");
-            var status = _krnDiskDriver.diskRead(f);
-            console.log("recieved status");
+            var status = _krnDiskDriver.diskRead(f)[1];
             if (status == FILE_NAME_DOESNT_EXIST) {
                 _StdOut.putText("The file: " + f + " does not exist.");
                 return;
             }
             else {
-                _StdOut.putText(status.toString());
+                _StdOut.putText(status);
                 return;
             }
             // Print out file
@@ -655,8 +650,9 @@ var TSOS;
             }
         };
         Shell.prototype.shellFormat = function () {
-            _Disk.init();
-            TSOS.Control.hostDisk();
+            _krnDiskDriver.formatDisk();
+            _StdOut.putText("Disk successfully formatted");
+            return;
         };
         Shell.prototype.shellLs = function () {
             _krnDiskDriver.ls();

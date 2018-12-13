@@ -18,6 +18,7 @@
 
 module TSOS {
     export class Cpu {
+        
         public constructor(public PC = 0,
             public IR = "00",
             public Acc = 0,
@@ -27,7 +28,7 @@ module TSOS {
             public isExecuting: boolean = false) {
        
     }
-
+        //initialize all values to zero
         public init(): void {
             this.PC = 0;
             this.IR = "00";
@@ -48,13 +49,14 @@ module TSOS {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
+            //first update the IR
             this.IR = _MemoryAccessor.readMemory(this.PC);
             
             Control.updateCPUDisp();
             
             this.isExecuting = true;
-            if (!_MemoryAccessor.isValid(this.PC)) {
-                _KernelInterruptQueue.enqueue(new Interrupt(PC_OUT_OF_BOUNDS, 0));
+            if (!_MemoryAccessor.isValid(this.PC)) {//make sure we are at a valid location so nothing gets messed up
+                _KernelInterruptQueue.enqueue(new Interrupt(PC_OUT_OF_BOUNDS, 0));//then throw a PC out of bounds error
                
             } else {
                 var code = _MemoryAccessor.readMemory(this.PC);
@@ -67,16 +69,16 @@ module TSOS {
                         Control.hostLog("Setting accumulator to " + _MemoryAccessor.readMemory(this.PC + 1), "CPU");
 
                         this.PC += 2;
-                        Control.updateCPUDisp();
+                        
                         break;
 
                     case "AD":
-                        //load accumulator with a constant stored in memory already
+                        //load accumulator with a constant already stored in memory
                         var hex = _MemoryAccessor.readMemory(this.PC + 2);
-                        hex += _MemoryAccessor.readMemory(this.PC + 1);
+                        hex += _MemoryAccessor.readMemory(this.PC + 1);//have to swap the integers to get the logical memory address
 
                         var loc = parseInt(hex, 16);
-                        this.Acc = parseInt(_MemoryAccessor.readMemory(loc), 16);
+                        this.Acc = parseInt(_MemoryAccessor.readMemory(loc), 16);//load accumulator
                         this.PC += 3;
                         break;
                     case "8D":
@@ -88,7 +90,7 @@ module TSOS {
                         var address = parseInt(hex, 16);
                         //Acc is displayed as decimal so we need to convert it to hex to store it
                         var val = this.Acc.toString(16);
-                        _MemoryAccessor.writeMemory(address, val);
+                        _MemoryAccessor.writeMemory(address, val);//then put it in the desired location
                         Control.hostMemory();
                         this.PC += 3;
                         break;
@@ -150,23 +152,12 @@ module TSOS {
                         
                         //change process state to complete
                         _ProcessManager.updatePCB();
+                        //then enqueue a context switch
+                        _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, 0));
+                        
+                        this.isExecuting = false;
                         //remove the process
                         
-                        if (RUNALL) {
-                            if (_ProcessManager.readyQueue.getSize() > 0) {
-                                _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
-                               
-                            } else {
-                                _Kernel.krnTrace("Finished Running all processes");
-                                _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
-                            }
-                            
-                        } else {
-                            _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
-                            _Kernel.krnTrace("Exiting process");
-                        }
-                        Control.hostMemory();
-                        Control.updatePCBDisp();
                         
                         break;
                     case "EC":
@@ -179,7 +170,7 @@ module TSOS {
                         var address = parseInt(hex, 16);
                         //then get the value at that address and convert it to decimal
                         var value = parseInt(_MemoryAccessor.readMemory(address), 16);
-                        //compare it to the Xregister
+                        //compare it to the Xregister and set Zflag accordingly
                         if (this.Xreg == value) {
                             this.Zflag = 1;
                         } else {
@@ -232,10 +223,12 @@ module TSOS {
                                 var ascii = _MemoryAccessor.readMemory(addr);
                                 // Convert hex to decimal
                                 var dec = parseInt(ascii.toString(), 16);
+                                //then convert from charcode to the actual character
                                 var chr = String.fromCharCode(dec);
                                 output += chr;
                                 addr++;
                             }
+                            //then output the result
                             _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONSOLE_WRITE, "String: " + output));
 
                         }
@@ -244,11 +237,7 @@ module TSOS {
                     
                 }
                 //update CPU and Memory displays
-                try {
-                    _ProcessManager.updatePCB();
-                } catch (e) {
-                    console.log('Error' + e);
-                }
+                
                
                 Control.updateCPUDisp();
                 Control.hostMemory();

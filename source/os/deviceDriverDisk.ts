@@ -12,9 +12,31 @@ module TSOS {
             this.status = "loaded";
 
         }
+        public formatDisk() {
+
+            //reformats the disk and overwrites all data
+            //first reinitialize disk
+            _Disk.init();
+
+            //then remove any swapped processes from the resident Queue
+            var resSize = _ProcessManager.residentQueue.getSize();
+            for (var i = 0; i < resSize; i++) {
+                var pcb: PCB = _ProcessManager.residentQueue.dequeue();
+                if (pcb.swapped) {
+                    //if its swapped we just dont put it back on the queue
+                } else {
+                    _ProcessManager.residentQueue.enqueue(pcb);
+                }
+
+            }
+            Control.updatePCBDisp();
+            Control.hostDisk();
+
+
+        }
         public ls() {
             //lists all files present on the system
-            _StdOut.putText("filename                        date created");
+            _StdOut.putText("filename                    date created");
             _StdOut.advanceLine();
 
             
@@ -38,13 +60,12 @@ module TSOS {
                                 }
                             
                         }
-                        string += " - ";
+                        string += "         -          ";
                         string += parseInt(data[0], 16) + "/";
                         string += parseInt(data[1], 16) + "/";
                         var year = "" + data[2] + "" + data[3];
                         string += parseInt(year, 16);
-                        _StdOut.putText(string);
-                        _StdOut.advanceLine();
+                        _KernelInterruptQueue.enqueue(new Interrupt(CONSOLE_WRITE, string));
                        
                     }
                 }
@@ -54,6 +75,7 @@ module TSOS {
             
         }
         public alreadyExists(file: string): boolean {
+            //checks to see if a file already exists in the directory
             var hexArr = this.toASCII(file);
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -85,6 +107,7 @@ module TSOS {
             return false;
         }
         public diskWrite(filename, text) {
+            //Writes data to the specified file
             //check directory for filename
             var hex = this.toASCII(filename);
             for (var s = 0; s < _Disk.sectors; s++) {
@@ -126,15 +149,18 @@ module TSOS {
             return FILE_NAME_DOESNT_EXIST;
         }
         public writeData(ID, data) {
+            //writes data to block specified by diskWrite
             var pointer = 0;
             var currentID = ID;
             _Kernel.krnTrace("Writing to ID: " + currentID);
             var currBlock = JSON.parse(sessionStorage.getItem(currentID));
             //clear existing data
             currBlock = this.clearData(currBlock);
+            
             for (var i = 0; i < data.length; i++) {
                 currBlock.data[pointer] = data[i];
                 pointer++;
+                
             //make sure there is still space in the block
                 if (pointer == _Disk.dataSize) {
                     //set block in session storage
@@ -145,6 +171,7 @@ module TSOS {
                     pointer = 0;
                 }
             }
+            
             //if the pointer in current block is still pointing to something, the old file was longer, so clear the rest
             this.deleteData(currBlock.pointer);
             currBlock.pointer = "0:0:0";
@@ -154,6 +181,7 @@ module TSOS {
             
         }
         public writeSwap(fname, codes) {
+            //writes a user program to disk for use later
             var hex = this.toASCII(fname);
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -180,11 +208,15 @@ module TSOS {
                             var dataBlock = JSON.parse(sessionStorage.getItem(dir.pointer));
                             dataBlock.availableBit = "0";
                             sessionStorage.setItem(dir.pointer, JSON.stringify(dataBlock));
+                            
                             var loc = this.allocateDiskSpace(codes, dir.pointer);
+                            
                             if (!loc) {
                                 return DISK_FULL;
                             }
+                            
                             this.writeData(dir.pointer, codes);
+                            
                             return SUCCESS;
 
                            
@@ -198,7 +230,8 @@ module TSOS {
 
         }
         public readData(ID) {
-            _Kernel.krnTrace("Shell: Reading data in location: " + ID);
+            //reads data at the id given by diskRead
+            _Kernel.krnTrace("DiskDriver: Reading data in location: " + ID);
             var block = JSON.parse(sessionStorage.getItem(ID));
             var pointer = 0;
             var retArr = [];
@@ -214,20 +247,18 @@ module TSOS {
                     } else {
                         return retArr;
                     }
-                } else if (block.data[pointer] == "00") {
-                    
-                    return retArr;
-                }
+                } 
             }
             
         }
         public diskRead(filename) {
+            //reads the data in a specific file
             _Kernel.krnTrace("DiskDriver: attempting to read file: " + filename);
-            console.log("diskRead: attempting to read file: " + filename);
+           
             //look for filename in directory
             var hex = new Array();
             hex = this.toASCII(filename);
-            console.log("diskRead: got ascii name");
+            
            
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -252,24 +283,24 @@ module TSOS {
                         }
                         //if we did find it
                         if (fileFound) {
-                            console.log("diskRead: file found");
+                            
                             //read recursively
-                            var nextID = dir.pointer;
-                            console.log("diskRead attempting to call readData");
-                            var data = this.readData(nextID);
-                            console.log("diskRead: data read");
-                            var pointer = 0;
-                            var fileData = new Array();
+                            var dataPointer = dir.pointer;
+                            
+                            var data:string[] = this.readData(dataPointer);
+                           
+                            
+                            var fileData = "";
                             for (var i = 0; i < data.length; i++) {
                                 //read until we get to a 00
                                 if (data[i] != "00") {
-                                    fileData.push(String.fromCharCode(parseInt(data[i], 16)));
+                                    fileData += (String.fromCharCode(parseInt(data[i], 16)));
                                     
                                 } else {
                                     break;
                                 }
                             }
-                            console.log("finished the loop");
+                            
                             var retVal = [data, fileData];
                             return retVal;
                         }
@@ -279,6 +310,8 @@ module TSOS {
             return FILE_NAME_DOESNT_EXIST;
         }
         public diskDelete(file) {
+            //deletes a file
+            
             var hexArr = this.toASCII(file);
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -310,6 +343,7 @@ module TSOS {
             }
         }
         public deleteData(ID) {
+            //removes the pointers and changes the available bit of the ID given by diskDelete
             var block = JSON.parse(sessionStorage.getItem(ID));
             if (block.pointer != "0:0:0") {//if the pointer of the next block isnt empty
                 this.deleteData(block.pointer);//keep deleting recursively
@@ -319,7 +353,7 @@ module TSOS {
             return SUCCESS;
         }
         public createFile(filename: string) {
-            //creates new file in first open block 
+            //creates new file in first open block in the directory
             _Kernel.krnTrace("Attempting to create file: " + filename);
             if (this.alreadyExists(filename)) {
                 return "Already exists";
@@ -387,6 +421,7 @@ module TSOS {
             return DISK_FULL;
         }
         public allocateDiskSpace(file, ID) {
+            //allocates some disk space for a file 
             //check the size of the file, if its more than one block we have to allocate more than one block 
             var length = file.length;
             var blockID = ID;
@@ -447,6 +482,7 @@ module TSOS {
             }
         }
         public clearData(block) {
+            //overwrites data in a specified block
             for (var i = 0; i < _Disk.dataSize; i++) {
                 block.data[i] = "00";
             }
@@ -466,6 +502,7 @@ module TSOS {
             return hexArr;
         }
         public getFreeBlocks(n) {
+            //returns an array with IDs of free blocks 
             var blocks = [];
             var start = _Disk.sectors * _Disk.blocks;//where blocks start
             var end = _Disk.tracks * _Disk.sectors;//where they end

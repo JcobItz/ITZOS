@@ -117,7 +117,7 @@ module TSOS {
 
             this.commandList[this.commandList.length] = sc;
             //load
-            sc = new ShellCommand(this.shellLoad, "load", " - validates hex code in program input.");
+            sc = new ShellCommand(this.shellLoad, "load", "<int:priority> - validates hex code in program input and creates a new process which is loaded into memory. <int:priority> is optional");
 
             this.commandList[this.commandList.length] = sc;
             //run
@@ -294,7 +294,6 @@ module TSOS {
                 _StdOut.advanceLine();
                 _StdOut.putText("must be the pride of [subject hometown here].");
             } else {
-                _StdOut.putText(this.shellSpellCheck());
                 _StdOut.putText("Type 'help' for, well... help.");
             }
         }
@@ -537,7 +536,7 @@ module TSOS {
             //triggers an OS error
             _Kernel.krnTrapError("Routine test");
         }
-        public shellLoad() {
+        public shellLoad(args) {
             //validates user program input and loads it into main memory
             var input = <HTMLTextAreaElement> document.getElementById("taProgramInput");
             var hex = [];
@@ -562,7 +561,7 @@ module TSOS {
             _StdOut.putText("Input Validated.");// if all the codes are valid, tell the user
   
             document.getElementById("taProgramInput").style.border = "2px solid green";
-            _ProcessManager.createProcess(hex, null);//then load them into memory 
+            _ProcessManager.createProcess(hex, args);//then load them into memory 
            
             
         }
@@ -608,6 +607,7 @@ module TSOS {
             
         }
         public shellClearMem() {
+            //clears all memory partitions
             _MemoryManager.clearMem(0);
             _MemoryManager.clearMem(1);
             _MemoryManager.clearMem(2);
@@ -615,15 +615,18 @@ module TSOS {
 
         }
         public shellClearPartition(p: number) {
+            //clears only the specified memory partition
             _MemoryManager.clearMem(p);
            
         }
         
         public shellRunAll() {
+            //runs all processes
             _ProcessManager.runAll();
             RUNALL = true;
         }
         public shellPs() {
+            //returns a list of the processes in the ready queue
             var pList = _ProcessManager.listPs();
             var output = "";
             for (var i = 0; i < pList.length; i++) {
@@ -633,13 +636,15 @@ module TSOS {
             _StdOut.putText(output);
         }
         public shellKill(pid) {
-            _KernelInterruptQueue.enqueue(new Interrupt(EXIT_PROCESS, RUNALL));
+            //kills the specified process
+            _ProcessManager.remove(pid)
         }
         public shellQuantum(q: number) {
+            //sets the quantum of the CPU scheduler for Round Robin
             _CPUScheduler.quantum = q;
         }
         public shellCreateFile(f: string) {
-            alert(f);
+            //creates an empty file with the specified name
             if (f.length > 56) {
                 _StdOut.putText("File name length too long! Must be " + 56 + " characters or less.");
                 return;
@@ -669,25 +674,25 @@ module TSOS {
 
         }
         public shellReadFile(f: string) {
-            console.log("SHell attempting to read file: " + f);
+            //outputs the contents of the requested file
             _Kernel.krnTrace("Shell: attempting to read file" + f);
             _Kernel.krnTrace("checking for $");
             for (var i = 0; i < f.length; i++) {
                 if (f.toString().charAt(i) == "$") {
-                    _StdOut.putText("Oman u do not wanna do dat");
+                    _StdOut.putText("Look, you aren't the OS... you cant be trying to talk to my processes...");
                     return;
                 }
             }
-            console.log("finished checking for $");
+            
             _Kernel.krnTrace("Shell: Finished checking for $");
             
-            var status = _krnDiskDriver.diskRead(f);
-            console.log("recieved status");
+            var status = _krnDiskDriver.diskRead(f)[1];
+            
             if (status == FILE_NAME_DOESNT_EXIST) {
                 _StdOut.putText("The file: " + f + " does not exist.");
                 return;
             } else {
-                _StdOut.putText(status.toString());
+                _StdOut.putText(status);
                 return;
             }
             // Print out file
@@ -696,6 +701,7 @@ module TSOS {
 
         }
         public shellWriteFile(args) {
+            //write the given string to the given file 
             if (args.length >= 2) {
                 // make sure user can't write to swap files
                 if (args[0].includes("$")) {
@@ -739,6 +745,7 @@ module TSOS {
             }
         }
         public shellDeleteFile(args) {
+            //deletes given file
             if (args.length == 1) {
                 // make sure user can't delete swap files
                 if (args[0].includes("$")) {
@@ -762,19 +769,29 @@ module TSOS {
             }
         }
         public shellFormat() {
-            _Disk.init();
-            Control.hostDisk();
+            //reformats the Disk
+            _krnDiskDriver.formatDisk();
+            _StdOut.putText("Disk successfully formatted");
+            return;
         }
         public shellLs() {
+            //lists all the files and their creation dates in StdOut
             _krnDiskDriver.ls();
             return;
         }
         public shellSetSchedule(sched) {
-            _CPUScheduler.setSchedule(sched);
+            //sets the scheduling algorithm to the requested algorithm
+            if (sched == "rr" || sched == "fcfs" || sched == "priority") {
+                _CPUScheduler.setSchedule(sched);
+            } else {
+                _StdOut.putText(sched + " is not one of the algorithms supported by ITZOS, use rr for Round Robin, fcfs for First Come First Serve, and priority for Non-Preemptive priority.");
+            }
+            
             return;
 
         }
         public shellGetSchedule() {
+            //returns the current scheduling algorithm
             _CPUScheduler.getSchedule();
         }
         

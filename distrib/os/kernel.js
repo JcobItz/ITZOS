@@ -119,13 +119,25 @@ var TSOS;
                     _StdIn.handleInput();
                     break;
                 case CONTEXT_SWITCH:
-                    _CPUScheduler.switchContext();
-                    _CPU.isExecuting = true;
+                    //switches to kernel mode and calls on CPUscheduler to switch context 
+                    _Mode = 0;
+                    _CPUScheduler.unwatch();
+                    if (!_ProcessManager.readyQueue.isEmpty() && RUNALL == true) {
+                        _CPUScheduler.switchContext();
+                        _CPU.isExecuting = true;
+                    }
+                    else if (_ProcessManager.readyQueue.isEmpty() && RUNALL == true) {
+                        RUNALL = false;
+                    }
+                    else {
+                        TSOS.Control.updatePCBDisp();
+                        TSOS.Control.updateCPUDisp();
+                    }
+                    _Mode = 1;
                     break;
                 case EXIT_PROCESS:
+                    //exits a process
                     _CPUScheduler.unwatch();
-                    _CPUScheduler.switchContext();
-                    _ProcessManager.running = void 0;
                     TSOS.Control.updateCPUDisp();
                     TSOS.Control.updatePCBDisp();
                     if (params && _ProcessManager.readyQueue.getSize() > 0) {
@@ -135,9 +147,11 @@ var TSOS;
                     TSOS.Control.updatePCBDisp();
                     break;
                 case PC_OUT_OF_BOUNDS:
+                    //lets the user know that the program counter out of bounds
                     _StdOut.putText("PC is out of bounds");
                     break;
                 case CONSOLE_WRITE:
+                    //writes a message to StdOut
                     _StdOut.putText(params);
                     _StdOut.advanceLine();
                     _OsShell.putPrompt();

@@ -82,6 +82,7 @@
                     height="500px"
                     tabindex="3"></canvas>
         </div>
+        <!--Disk display table-->
         <div id="diskDisplay" style="overflow-x:scroll; overflow-y: scroll; width: 20%; height: 200px;">
             <label for="diskTable">Disk</label>
             <table id="diskTable"></table>
@@ -97,7 +98,7 @@
                           cols="48"></textarea>
             </label>
         </div>
-
+        <!--CPU display -->
         <div id="divCPU" style="margin-left: 520px;">
             CPU
             <div id="headings">
@@ -119,24 +120,25 @@
 
             </div>
         </div>
-
+        <!--Ready Queue display table-->
         <div id="divReady" style="margin-left: 520px;">
             Ready Processes
             <table id="readyprocesses">
-                <tr><th>PID</th><th>PC</th><th>IR</th><th>Acc</th><th>Xreg</th><th>Yreg</th><th>Xflag</th><th>State</th><th>Partition</th></tr>
+                <thead><tr><th>PID</th><th>PC</th><th>IR</th><th>Acc</th><th>Xreg</th><th>Yreg</th><th>Zflag</th><th>State</th><th>Partition</th></tr></thead>
 
             </table>
 
         </div>
-       
+        <!--Resident Queue display table-->
         <div id="divProcesses" style="margin-left: 520px;">
             Resident Processes
             <table id="processes">
-                <tr><th>PID</th><th>PC</th><th>IR</th><th>Acc</th><th>Xreg</th><th>Yreg</th><th>Xflag</th><th>State</th><th>Partition</th></tr>
+                <thead><tr><th>PID</th><th>PC</th><th>IR</th><th>Acc</th><th>Xreg</th><th>Yreg</th><th>Zflag</th><th>State</th><th>Partition</th></tr></thead>
 
             </table>
 
         </div>
+        <!--Memory display table-->
         <div id="divMemory">
 
             <table id="addresses">
@@ -146,7 +148,7 @@
 
         </div>
 
-
+        <!--User Program text area-->
         <div id="divUserProgramInput" style="margin-left:520px;">
             <label>
                 User Program Input

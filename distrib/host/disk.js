@@ -15,6 +15,7 @@ var TSOS;
             this.dataSize = dataSize;
         }
         Disk.prototype.init = function () {
+            //loads data with zeros, and sets all pointers to 0:0:0
             for (var t = 0; t < this.tracks; t++) {
                 for (var s = 0; s < this.sectors; s++) {
                     for (var b = 0; b < this.blocks; b++) {
@@ -28,7 +29,7 @@ var TSOS;
                             pointer: "0:0:0",
                             data: data
                         };
-                        sessionStorage.setItem(key, JSON.stringify(block));
+                        sessionStorage.setItem(key, JSON.stringify(block)); //push each one to session storage
                     }
                 }
             }

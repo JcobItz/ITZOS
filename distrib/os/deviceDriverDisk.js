@@ -25,9 +25,27 @@ var TSOS;
         deviceDriverDisk.prototype.DiskdriverEntry = function () {
             this.status = "loaded";
         };
+        deviceDriverDisk.prototype.formatDisk = function () {
+            //reformats the disk and overwrites all data
+            //first reinitialize disk
+            _Disk.init();
+            //then remove any swapped processes from the resident Queue
+            var resSize = _ProcessManager.residentQueue.getSize();
+            for (var i = 0; i < resSize; i++) {
+                var pcb = _ProcessManager.residentQueue.dequeue();
+                if (pcb.swapped) {
+                    //if its swapped we just dont put it back on the queue
+                }
+                else {
+                    _ProcessManager.residentQueue.enqueue(pcb);
+                }
+            }
+            TSOS.Control.updatePCBDisp();
+            TSOS.Control.hostDisk();
+        };
         deviceDriverDisk.prototype.ls = function () {
             //lists all files present on the system
-            _StdOut.putText("filename                        date created");
+            _StdOut.putText("filename                    date created");
             _StdOut.advanceLine();
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -46,19 +64,19 @@ var TSOS;
                                 string += String.fromCharCode(parseInt(data[i], 16));
                             }
                         }
-                        string += " - ";
+                        string += "         -          ";
                         string += parseInt(data[0], 16) + "/";
                         string += parseInt(data[1], 16) + "/";
                         var year = "" + data[2] + "" + data[3];
                         string += parseInt(year, 16);
-                        _StdOut.putText(string);
-                        _StdOut.advanceLine();
+                        _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONSOLE_WRITE, string));
                     }
                 }
             }
             return;
         };
         deviceDriverDisk.prototype.alreadyExists = function (file) {
+            //checks to see if a file already exists in the directory
             var hexArr = this.toASCII(file);
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -90,6 +108,7 @@ var TSOS;
             return false;
         };
         deviceDriverDisk.prototype.diskWrite = function (filename, text) {
+            //Writes data to the specified file
             //check directory for filename
             var hex = this.toASCII(filename);
             for (var s = 0; s < _Disk.sectors; s++) {
@@ -129,6 +148,7 @@ var TSOS;
             return FILE_NAME_DOESNT_EXIST;
         };
         deviceDriverDisk.prototype.writeData = function (ID, data) {
+            //writes data to block specified by diskWrite
             var pointer = 0;
             var currentID = ID;
             _Kernel.krnTrace("Writing to ID: " + currentID);
@@ -156,6 +176,7 @@ var TSOS;
             TSOS.Control.hostDisk();
         };
         deviceDriverDisk.prototype.writeSwap = function (fname, codes) {
+            //writes a user program to disk for use later
             var hex = this.toASCII(fname);
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -195,7 +216,8 @@ var TSOS;
             return FILE_NAME_DOESNT_EXIST;
         };
         deviceDriverDisk.prototype.readData = function (ID) {
-            _Kernel.krnTrace("Shell: Reading data in location: " + ID);
+            //reads data at the id given by diskRead
+            _Kernel.krnTrace("DiskDriver: Reading data in location: " + ID);
             var block = JSON.parse(sessionStorage.getItem(ID));
             var pointer = 0;
             var retArr = [];
@@ -213,18 +235,14 @@ var TSOS;
                         return retArr;
                     }
                 }
-                else if (block.data[pointer] == "00") {
-                    return retArr;
-                }
             }
         };
         deviceDriverDisk.prototype.diskRead = function (filename) {
+            //reads the data in a specific file
             _Kernel.krnTrace("DiskDriver: attempting to read file: " + filename);
-            console.log("diskRead: attempting to read file: " + filename);
             //look for filename in directory
             var hex = new Array();
             hex = this.toASCII(filename);
-            console.log("diskRead: got ascii name");
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
                     if (s == 0 && b == 0) {
@@ -248,24 +266,19 @@ var TSOS;
                         }
                         //if we did find it
                         if (fileFound) {
-                            console.log("diskRead: file found");
                             //read recursively
-                            var nextID = dir.pointer;
-                            console.log("diskRead attempting to call readData");
-                            var data = this.readData(nextID);
-                            console.log("diskRead: data read");
-                            var pointer = 0;
-                            var fileData = new Array();
+                            var dataPointer = dir.pointer;
+                            var data = this.readData(dataPointer);
+                            var fileData = "";
                             for (var i = 0; i < data.length; i++) {
                                 //read until we get to a 00
                                 if (data[i] != "00") {
-                                    fileData.push(String.fromCharCode(parseInt(data[i], 16)));
+                                    fileData += (String.fromCharCode(parseInt(data[i], 16)));
                                 }
                                 else {
                                     break;
                                 }
                             }
-                            console.log("finished the loop");
                             var retVal = [data, fileData];
                             return retVal;
                         }
@@ -275,6 +288,7 @@ var TSOS;
             return FILE_NAME_DOESNT_EXIST;
         };
         deviceDriverDisk.prototype.diskDelete = function (file) {
+            //deletes a file
             var hexArr = this.toASCII(file);
             for (var s = 0; s < _Disk.sectors; s++) {
                 for (var b = 0; b < _Disk.blocks; b++) {
@@ -306,6 +320,7 @@ var TSOS;
             }
         };
         deviceDriverDisk.prototype.deleteData = function (ID) {
+            //removes the pointers and changes the available bit of the ID given by diskDelete
             var block = JSON.parse(sessionStorage.getItem(ID));
             if (block.pointer != "0:0:0") { //if the pointer of the next block isnt empty
                 this.deleteData(block.pointer); //keep deleting recursively
@@ -315,7 +330,7 @@ var TSOS;
             return SUCCESS;
         };
         deviceDriverDisk.prototype.createFile = function (filename) {
-            //creates new file in first open block 
+            //creates new file in first open block in the directory
             _Kernel.krnTrace("Attempting to create file: " + filename);
             if (this.alreadyExists(filename)) {
                 return "Already exists";
@@ -381,6 +396,7 @@ var TSOS;
             return DISK_FULL;
         };
         deviceDriverDisk.prototype.allocateDiskSpace = function (file, ID) {
+            //allocates some disk space for a file 
             //check the size of the file, if its more than one block we have to allocate more than one block 
             var length = file.length;
             var blockID = ID;
@@ -442,6 +458,7 @@ var TSOS;
             }
         };
         deviceDriverDisk.prototype.clearData = function (block) {
+            //overwrites data in a specified block
             for (var i = 0; i < _Disk.dataSize; i++) {
                 block.data[i] = "00";
             }
@@ -459,6 +476,7 @@ var TSOS;
             return hexArr;
         };
         deviceDriverDisk.prototype.getFreeBlocks = function (n) {
+            //returns an array with IDs of free blocks 
             var blocks = [];
             var start = _Disk.sectors * _Disk.blocks; //where blocks start
             var end = _Disk.tracks * _Disk.sectors; //where they end
